@@ -191,24 +191,22 @@ hb_wrapper = function(data, job, instance, ...) {
   target_name = names(data)[ncol(data)]
   y = data[[target_name]]
   tree = rpart(as.formula(paste0(target_name, "~ .")), data = data)
-
-
-  # x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]]
-  # mod = apply(X = x_interest, MARGIN = 1L, function(x) {
-  #   browser()
-  #   mod = as.party(tree)
-  #   attr(mod, "x_interest") = x
-  #   iml::Predictor$new(model = mod, data = data, predict.function = function(model, newdata) {
-  #     node_interest = predict(model, newdata = attr(model, "x_interest"), type = "node")
-  #     prediction = ifelse(predict(model, newdata = newdata, type = "node") == node_interest, 1, 0)
-  #   })
-  # })
-  # GET TERMINAL NODE
   mod = as.party(tree)
-  # print(summary(predict(mod, type = "node")))
-  # predict(mod, newdata = data[1,], type = "node")
 
-  return(mod)
+  x_interests = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]]
+  predictor_list = list()
+
+  for (i in seq_len(nrow(x_interests))) {
+    x_interest = x_interests[i,]
+    attr(mod, "x_interest") = x_interest
+    predictor_list[[i]] = Predictor$new(model = mod, data = data, y = target_name,
+      predict.function = function(model, newdata) {
+        node_interest = predict(model, newdata = attr(model, "x_interest"), type = "node")
+        prediction = ifelse(predict(model, newdata = newdata, type = "node") == node_interest, 1, 0)
+      })
+  }
+
+  return(predictor_list)
 }
 
 

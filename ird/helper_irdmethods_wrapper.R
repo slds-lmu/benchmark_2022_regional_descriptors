@@ -7,15 +7,11 @@ maire_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
 
 
-  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
+  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.max)]
 
   # REGRESSION: desired_class = NULL
 
-  desired_range = if (pred_x_interest[[desired_class]] < 0.5) {
-    c(0, 0.5 - sqrt(.Machine$double.eps))
-  }  else {
-    c(0.5 + sqrt(.Machine$double.eps), 1)
-  }
+  desired_range = c(0.5, 1)
 
   maire = Maire$new(pred, num_of_iterations = 100L, quiet = FALSE)
   box = maire$find_box(x_interest = x_interest, desired_class = desired_class,
@@ -38,15 +34,11 @@ maxbox_wrapper = function(data, job, instance, ...) {
   pred = get_predictor_and_x_interest_pp(arg_list, job, data)
   pred_x_interest = pred$predict(x_interest)
 
-  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
+  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.max)]
 
   # REGRESSION: desired_class = NULL
 
-  desired_range = if (pred_x_interest[[desired_class]] < 0.5) {
-    c(0, 0.5 - sqrt(.Machine$double.eps))
-  }  else {
-    c(0.5 + sqrt(.Machine$double.eps), 1)
-  }
+  desired_range = c(0.5, 1)
 
   method = MaxBox$new(pred, quiet = FALSE)
   box = method$find_box(x_interest = x_interest, desired_class = desired_class,
@@ -71,14 +63,11 @@ prim_wrapper = function(data, job, instance, ...) {
   pred_x_interest = pred$predict(x_interest)
 
 
-  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.min)]
+  desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.max)]
 
   # REGRESSION: desired_class = NULL
-  desired_range = if (pred_x_interest[[desired_class]] < 0.5) {
-    c(0, 0.5 - sqrt(.Machine$double.eps))
-  }  else {
-    c(0.5 + sqrt(.Machine$double.eps), 1)
-  }
+
+  desired_range = c(0.5, 1)
 
   method = Prim$new(pred)
   box = method$find_box(x_interest = x_interest, desired_class = desired_class,

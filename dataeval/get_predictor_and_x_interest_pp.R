@@ -9,15 +9,6 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
   prob_name = job$prob.name
   # }
 
-  if (prob_name %in% c("credit_g", "tic_tac_toe", "cmc", "vehicle")) {
-    type = "prob"
-    task = "classification"
-  } else {
-    type = NULL
-    task = "regression"
-  }
-}
-
   if (is_keras) {
     if (TEST) {
       model_dir = file.path("models/test/keras", arg_list$model_name)
@@ -57,15 +48,22 @@ get_predictor_and_x_interest_pp = function(arg_list, job, data) {
     job_id = model_job_params[problem == prob_name & algorithm == arg_list$model_name]
     this_model = loadResult(id = job_id, reg = model_registry)
     if (class(this_model)[1] == "constparty") {
-      pred = this_model[[arg_list$id_x_interest]]
+      x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
+      attr(this_model, "x_interest") = x_interest
+      pred = Predictor$new(model = this_model, data = data, y = target_name,
+        predict.function = function(model, newdata) {
+          node_interest = predict(model, newdata = attr(model, "x_interest"), type = "node")
+          prediction = ifelse(predict(model, newdata = newdata, type = "node") == node_interest, 1, 0)
+      })
     } else {
-      pred = Predictor$new(this_model, data = data, y = target_name, type = type, task = task)
+      pred = Predictor$new(this_model, data = data, y = target_name, type = "prob" )
     }
+    return(pred)
   }
 
-  print(summary(pred$predict(data)))
+  # summary(pred$predict(data))
 
-  return(pred)
+  pred
 }
 
 
