@@ -1,8 +1,13 @@
-get_predictor = function(model_name, data_name, id_x_interest) {
+get_predictor = function(data, model_name, data_name, id_x_interest) {
 
-  data = data_list[[data_name]]
   target_name = names(data)[ncol(data)]
   is_keras = model_name == "neural_network"
+
+    if (data_name %in% c("diabetes", "tic_tac_toe", "cmc", "vehicle")) {
+    type = "prob"
+  } else {
+    type = NULL
+  }
 
   if (is_keras) {
     if (TEST) {
@@ -41,11 +46,11 @@ get_predictor = function(model_name, data_name, id_x_interest) {
     model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
     model_job_params = unwrap(getJobPars(reg = model_registry))
     job_id = model_job_params[problem == data_name & algorithm == model_name]
-    this_model = loadResult(id = job_id, reg = model_registry)
-    if (class(this_model)[1] == "constparty") {
+     this_model = loadResult(id = job_id, reg = model_registry)
+    if (is.list(this_model)) {
       pred = this_model[[id_x_interest]]
     } else {
-      pred = Predictor$new(this_model, data = data, y = target_name, type = "prob" )
+        pred = Predictor$new(this_model, data = data, y = target_name, type = type)
     }
   }
 
@@ -57,9 +62,10 @@ get_predictor = function(model_name, data_name, id_x_interest) {
 
 get_desired_range = function(data_name, pred, x_interest) {
   pred_x_interest = pred$predict(x_interest)
-  if (data_name %in% c("credit_g", "tic_tac_toe")) {
+  f_hat_data = pred$predict(pred$data$get.x())
+  if (pred$task == "classification") {
     desired_class = names(pred_x_interest)[apply(pred_x_interest, 1L, which.max)]
-    if (data_name %in% c("credit_g", "tic_tac_toe")) {
+    if (data_name %in% c("diabetes", "tic_tac_toe")) {
       desired_range = c(0.5, 1)
     }  else if (data_name %in% c("cmc", "vehicle")) {
       sdf_hat = 1/2*sd(f_hat_data[[desired_class]])
@@ -67,8 +73,7 @@ get_desired_range = function(data_name, pred, x_interest) {
       desired_range = c(max(min(desired_range), 0), min(max(desired_range), 1))
     }
   } else {
-    f_hat_data = pred$predict(pred$data$get.x())[[1]]
-    sdf_hat = 1/2*sd(f_hat_data)
+    sdf_hat = 1/2*sd(f_hat_data[[1]])
     desired_range = c(pred_x_interest[[1]] - sdf_hat, pred_x_interest[[1]] + sdf_hat)
     desired_class = NULL
   }

@@ -84,7 +84,7 @@ if (!dir.exists(keras_save_dir)) {
 # dir.create(keras_save_dir)
 
 # Run
-submitJobs(ids = c(1, 2, 4))
+submitJobs()
 waitForJobs()
 getStatus()
 

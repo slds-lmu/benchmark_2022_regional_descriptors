@@ -1,5 +1,5 @@
-packages = c("batchtools", "mlr3", "mlr3learners", "mlr3extralearners", "mlr3pipelines",
-  "mlr3tuning", "mlr3keras", "rpart", "partykit")
+packages = c("batchtools", "mlr3", "mlr3learners", "mlr3pipelines",
+  "mlr3tuning", "mlr3keras", "rpart", "partykit", "iml")
 new_packages = packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(new_packages) > 0L) install.packages(new_packages)
 
