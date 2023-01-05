@@ -10,6 +10,8 @@ TEST = FALSE
 source("ird/libs_ird.R")
 source("ird/helper_irdmethods_wrapper.R")
 source("ird/get_predictor_and_x_interest_pp.R")
+source("helpers/get_predictor.R")
+source("helpers/get_desired_range.R")
 
 # if (TEST) {
 #   source("ird/def_ird_test.R")
@@ -58,7 +60,7 @@ exp = unwrap(getJobPars())
 
 # jobids = exp[id_x_interest == 1 & model_name != "hyperbox", "job.id", with = FALSE][[1]]
 
-exp[model_name == "hyperbox" & problem == "credit_g",]
+exp[model_name == "hyperbox" & problem == "diabetes",]
 
 testJob(id = 1L)
 

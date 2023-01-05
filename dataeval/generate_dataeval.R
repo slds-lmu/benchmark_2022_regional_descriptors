@@ -24,6 +24,7 @@ extra_info_list = apply(gridspace, MARGIN = 1, function(row) {
   x_interest = x_interest_list[[data_name]][id_x_interest,]
   pred = get_predictor(data = data, data_name = data_name, model_name = model_name, id_x_interest = id_x_interest)
 
+  data = data.table(data_list[[data_name]])
   x_interest = x_interest[, pred$data$feature.names, with = FALSE]
   data = data[, pred$data$feature.names, with = FALSE]
 

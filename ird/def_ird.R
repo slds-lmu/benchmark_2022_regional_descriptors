@@ -2,7 +2,7 @@
 data_list = readRDS(file.path("data/data_storage/data_list.RDS"))
 
 # configurations
-models = c("ranger", "linear_model", "neural_network", "hyperbox")
+models = c("ranger", "hyperbox")
 
 ades = list(
   maire = CJ(
