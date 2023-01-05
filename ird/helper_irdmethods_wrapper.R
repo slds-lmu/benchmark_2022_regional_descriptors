@@ -17,7 +17,7 @@ maire_wrapper = function(data, job, instance, ...) {
   boxpost = post$find_box(x_interest = x_interest,
     desired_range = desired_range, box_init = box$box)
 
-  return(orig = box, postproc = boxpost)
+  return(list(orig = box, postproc = boxpost))
 }
 
 # MaxBox
@@ -41,7 +41,7 @@ maxbox_wrapper = function(data, job, instance, ...) {
   boxpost = post$find_box(x_interest = x_interest,
     desired_range = desired_range, box_init = box$box)
 
-  return(orig = box, postproc = boxpost)
+  return(list(orig = box, postproc = boxpost))
 
 }
 
@@ -66,7 +66,7 @@ prim_wrapper = function(data, job, instance, ...) {
   boxpost = post$find_box(x_interest = x_interest,
     desired_range = desired_range, box_init = box$box)
 
-  return(orig = box, postproc = boxpost)
+  return(list(orig = box, postproc = boxpost))
 }
 
 

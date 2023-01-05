@@ -60,15 +60,15 @@ exp = unwrap(getJobPars())
 
 # jobids = exp[id_x_interest == 1 & model_name != "hyperbox", "job.id", with = FALSE][[1]]
 
-exp[model_name == "hyperbox" & problem == "diabetes",]
+# exp[model_name == "hyperbox" & problem == "diabetes",]
 
-testJob(id = 1L)
+# testJob(id = 1L)
 
-testJob(id = jobids[[1]])
+# testJob(id = jobids[[1]])
 
-for (id in jobids) {
-  testJob(id = id)
-}
+# for (id in jobids) {
+#   testJob(id = id)
+# }
 
 
 # Run
