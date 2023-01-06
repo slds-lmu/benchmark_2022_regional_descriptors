@@ -1,6 +1,5 @@
 get_predictor_and_x_interest_pp = function(arg_list, job, data) {
   library(batchtools)
-
    get_predictor(data, model_name = arg_list$model_name, data_name = job$prob.name, id_x_interest = arg_list$id_x_interest)
 
   # target_name = names(data)[ncol(data)]

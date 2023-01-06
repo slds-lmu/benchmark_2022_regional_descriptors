@@ -55,6 +55,7 @@ addAlgorithm(name = "prim", fun = prim_wrapper)
 addExperiments(algo.designs = ades)
 summarizeExperiments()
 exp = unwrap(getJobPars())
+exp = exp[exp$id_x_interest == 1,]
 
 # exp[!duplicated(exp[c("problem", "algorithm", "model_name")])]
 
@@ -62,7 +63,7 @@ exp = unwrap(getJobPars())
 
 # exp[model_name == "hyperbox" & problem == "diabetes",]
 
-# testJob(id = 1L)
+testJob(id = exp$job.id)
 
 # testJob(id = jobids[[1]])
 
