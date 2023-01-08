@@ -1,12 +1,12 @@
 compare_methods = function (methods = c("maire", "maxbox", "prim"), postprocessed = c(0), orientation = "model", savepdf = FALSE) {
 
-  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
+  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2") # fixme add: plasma_retinol
   checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
 
-    con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
+        con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
 
@@ -15,9 +15,9 @@ compare_methods = function (methods = c("maire", "maxbox", "prim"), postprocesse
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet")) %>%
-      pivot_longer(c(locality:precision_sampled), names_to = "quality") %>%
+      pivot_longer(c(locality:maximality), names_to = "quality") %>%
       mutate(quality = factor(quality, levels = c("locality", "coverage_train", "coverage_sampled",
-        "precision_train", "precision_sampled")))
+        "precision_train", "precision_sampled", "maximality")))
 
     if (length(postprocessed) == 2) {
       res_long = res_long %>%
@@ -26,6 +26,7 @@ compare_methods = function (methods = c("maire", "maxbox", "prim"), postprocesse
 
     return(res_long)
   })
+
   names(aggrres) = data_set_names
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
 
@@ -108,7 +109,7 @@ compare_methods = function (methods = c("maire", "maxbox", "prim"), postprocesse
 
 comparison_table = function(methods = c("maire", "maxbox", "prim"), orientation = "model", savextable = FALSE) {
 
-  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
+  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2") #<FIXME>plasma_retinol
   checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
@@ -124,7 +125,7 @@ comparison_table = function(methods = c("maire", "maxbox", "prim"), orientation 
         logistic_regression = "logreg", neural_network = "neuralnet")) %>%
       pivot_longer(c(locality:precision_sampled), names_to = "quality") %>%
       mutate(quality = factor(quality, levels = c("locality", "coverage_train", "coverage_sampled",
-        "precision_train", "precision_sampled")))
+        "precision_train", "precision_sampled", "maximality")))
     return(res_long)
   })
 

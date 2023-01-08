@@ -8,10 +8,10 @@
 source("evaluation/analysis_helper.R")
 
 # RQ 1
-compare_methods(savepdf = TRUE)
+compare_methods(savepdf = FALSE)
 
 # RQ 3
-compare_methods(postprocessed = c(0, 1), savepdf = TRUE)
+compare_methods(postprocessed = c(0, 1), savepdf = FALSE)
 
 # RQ1 + RQ3
 comparison_table()
