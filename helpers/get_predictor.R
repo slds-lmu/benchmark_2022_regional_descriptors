@@ -3,10 +3,12 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
   target_name = names(data)[ncol(data)]
   is_keras = model_name == "neural_network"
 
-    if (data_name %in% c("diabetes", "tic_tac_toe", "cmc", "vehicle")) {
+  if (data_name %in% c("diabetes", "tic_tac_toe", "cmc", "vehicle")) {
     type = "prob"
+    task = "classification"
   } else {
     type = NULL
+    task = "regression"
   }
 
   if (is_keras) {
@@ -34,7 +36,10 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
           newdata[,(int_cols) := lapply(.SD, as.integer), .SDcols = int_cols]
         }
         newdata[, (target_name) := data[[target_name]][1]]
-        newdata = pipeline$predict(as_task_classif(newdata, target = target_name))[[1]]$data()
+        setcolorder(newdata, target_name)
+        if (class(pipeline)[1] == "Graph") {
+          newdata = pipeline$predict(as_task_classif(newdata, target = target_name))[[1]]$data()
+        }
         yhat = model %>% predict(as.matrix(newdata[, -1L]))
         yhat = data.table::as.data.table(yhat)
         names(yhat) = levels(data[[target_name]])
@@ -42,6 +47,7 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
       },
       type = "prob"
     )
+    pred$task = task
   } else {
     model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
     model_job_params = unwrap(getJobPars(reg = model_registry))

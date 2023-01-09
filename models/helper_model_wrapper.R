@@ -14,7 +14,7 @@ ranger_wrapper = function(data, job, instance, ...) {
 
   if (this_task$task_type == "classif") {
     # CLASSIFICATION
-    if (job$prob.name %in% c("tic_tac_toe", "credit_g", "cmc")) {
+    if (job$prob.name %in% c("tic_tac_toe", "diabetes", "cmc")) {
       mod = po("scale") %>>%
         po("encode") %>>%
         po("smote") %>>%
@@ -70,7 +70,7 @@ lm_wrapper = function(data, job, instance, ...) {
 
   if (this_task$task_type == "classif") {
     if (this_task$properties == "twoclass") {
-      if (job$prob.name %in% c("tic_tac_toe", "credit_g")) {
+      if (job$prob.name %in% c("tic_tac_toe", "diabetes")) {
         mod = po("scale") %>>%
           po("encode") %>>%
           po("smote") %>>%
@@ -105,9 +105,11 @@ nn_wrapper = function(data, job, instance, ...) {
   reticulate::use_condaenv("mlr3keras")
 
   target_name = names(data)[ncol(data)]
-  if (job$prob.name %in% c("tic_tac_toe", "credit_g", "cmc")) {
+  if (job$prob.name %in% c("tic_tac_toe", "diabetes", "cmc")) {
     pos = po("scale") %>>% po("encode") %>>% po("smote")
     data = pos$train(as_task_classif(data, target = target_name))[[1L]]$data()
+  } else {
+    pos = NULL
   }
   y = data[[target_name]]
   if (is.numeric(y) & length(unique(y)) > 3) {

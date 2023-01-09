@@ -50,6 +50,7 @@ for (i in seq_along(data_list)) {
 addAlgorithm(name = "maire", fun = maire_wrapper)
 addAlgorithm(name = "maxbox", fun = maxbox_wrapper)
 addAlgorithm(name = "prim", fun = prim_wrapper)
+addAlgorithm(name = "anchors", fun = anchors_wrapper)
 
 # Add experiments
 addExperiments(algo.designs = ades)
@@ -63,7 +64,7 @@ exp = exp[exp$id_x_interest == 1,]
 
 # exp[model_name == "hyperbox" & problem == "diabetes",]
 
-testJob(id = exp$job.id)
+testJob(id = 3)
 
 # testJob(id = jobids[[1]])
 
