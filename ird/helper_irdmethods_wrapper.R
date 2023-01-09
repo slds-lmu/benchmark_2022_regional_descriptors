@@ -1,6 +1,6 @@
 # MAIRE
 maire_wrapper = function(data, job, instance, ...) {
-  browser()
+
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
   pred = get_predictor_and_x_interest_pp(arg_list, job, data)
@@ -73,7 +73,6 @@ prim_wrapper = function(data, job, instance, ...) {
 
 # Anchors
 anchors_wrapper = function(data, job, instance, ...) {
-  browser()
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
   pred = get_predictor_and_x_interest_pp(arg_list, job, data)
