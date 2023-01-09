@@ -11,7 +11,7 @@ maire_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
-  maire = Maire$new(pred, num_of_iterations = 100L, convergence = TRUE, quiet = FALSE)
+  maire = Maire$new(pred, num_of_iterations = 100L, convergence = TRUE, quiet = TRUE)
   # maire = Maire$new(pred, num_of_iterations = 100L, convergence = FALSE, quiet = FALSE)
   box = maire$find_box(x_interest = x_interest, desired_range = desired_range)
 
@@ -34,7 +34,7 @@ maxbox_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
-  method = MaxBox$new(pred, quiet = FALSE)
+  method = MaxBox$new(pred, quiet = TRUE)
   box = method$find_box(x_interest = x_interest, desired_range = desired_range)
 
   # return(box)
@@ -59,7 +59,7 @@ prim_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
-  method = Prim$new(pred)
+  method = Prim$new(pred, quiet = TRUE)
   box = method$find_box(x_interest = x_interest, desired_range = desired_range)
 
   # return(box)
@@ -83,7 +83,7 @@ anchors_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
-  method = Anchor$new(pred)
+  method = Anchor$new(pred, quiet = TRUE)
   box = method$find_box(x_interest = x_interest, desired_range = desired_range)
 
   # return(box)
