@@ -32,6 +32,7 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
           set(newdata, j = factor_col, value = value)
         }
         int_cols = names(which(sapply(data, is.integer)))
+        int_cols = setdiff(int_cols, target_name)
         if (length(int_cols) > 0L) {
           newdata[,(int_cols) := lapply(.SD, as.integer), .SDcols = int_cols]
         }
@@ -42,10 +43,14 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
         }
         yhat = model %>% predict(as.matrix(newdata[, -1L]))
         yhat = data.table::as.data.table(yhat)
-        names(yhat) = levels(data[[target_name]])
+        if (task == "regression") {
+          names(yhat) = target_name
+        } else {
+          names(yhat) = levels(data[[target_name]])
+        }
         yhat
       },
-      type = "prob"
+      type = type
     )
     pred$task = task
   } else {
@@ -59,9 +64,7 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
         pred = Predictor$new(this_model, data = data, y = target_name, type = type)
     }
   }
-
-  print(summary(pred$predict(data)))
-
+  # print(summary(pred$predict(data)))
   return(pred)
 }
 

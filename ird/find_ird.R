@@ -64,7 +64,7 @@ exp = exp[exp$id_x_interest == 1,]
 
 # exp[model_name == "hyperbox" & problem == "diabetes",]
 
-testJob(id = 3)
+# testJob(id = 3)
 
 # testJob(id = jobids[[1]])
 
