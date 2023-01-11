@@ -4,6 +4,9 @@ get-data:
 train-models:
 	R CMD BATCH models/train_models.R
 
+generate-evaldata:
+	R CMD BATCH dataeval/generate_dataeval.R
+
 #resample:
 #	R CMD BATCH models/resample.R
 

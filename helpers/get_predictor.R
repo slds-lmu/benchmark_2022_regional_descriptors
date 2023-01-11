@@ -12,11 +12,7 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
   }
 
   if (is_keras) {
-    if (TEST) {
-      model_dir = file.path("models/test/keras", model_name)
-    } else {
-      model_dir = file.path("models/prod/keras", model_name)
-    }
+    model_dir = file.path("models/prod/keras", model_name)
     path_pipeline = file.path(model_dir, paste0(data_name, "_po.rds"))
     pipeline = readRDS(path_pipeline)
     model_path = file.path(model_dir, paste0(data_name, "_model.hdf5"))

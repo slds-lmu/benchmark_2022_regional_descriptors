@@ -1,6 +1,5 @@
 # MAIRE
 maire_wrapper = function(data, job, instance, ...) {
-
   arg_list = list(...)
   x_interest = readRDS(file.path("data/data_storage/x_interest_list.RDS"))[[job$prob.name]][arg_list$id_x_interest]
   pred = get_predictor_and_x_interest_pp(arg_list, job, data)
@@ -11,13 +10,16 @@ maire_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
+  filenam = paste0(paste(job$prob.name, arg_list$model_name, arg_list$id_x_interest, sep = "_"), ".rds")
+  obsdata = readRDS(file.path("dataeval/prod", paste0("data_inbox_", arg_list$datastrategy), filenam))
+  box_largest = readRDS(file.path("dataeval/prod/largest_box", filenam))
   maire = Maire$new(pred, num_of_iterations = 100L, convergence = TRUE, quiet = TRUE)
   # maire = Maire$new(pred, num_of_iterations = 100L, convergence = FALSE, quiet = FALSE)
-  box = maire$find_box(x_interest = x_interest, desired_range = desired_range)
+  box = maire$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
 
   post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = TRUE)
   boxpost = post$find_box(x_interest = x_interest,
-    desired_range = desired_range, box_init = box$box)
+    desired_range = desired_range, box_init = box$box, box_largest = box_largest)
 
   return(list(orig = box, postproc = boxpost))
 }
@@ -34,14 +36,19 @@ maxbox_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
+  # Get data (either training or sampled in largest box)
+  filenam = paste0(paste(job$prob.name, arg_list$model_name, arg_list$id_x_interest, sep = "_"), ".rds")
+  obsdata = readRDS(file.path("dataeval/prod", paste0("data_inbox_", arg_list$datastrategy), filenam))
+  box_largest = readRDS(file.path("dataeval/prod/largest_box", filenam))
+
   method = MaxBox$new(pred, quiet = TRUE)
-  box = method$find_box(x_interest = x_interest, desired_range = desired_range)
+  box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
 
   # return(box)
 
   post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = TRUE)
   boxpost = post$find_box(x_interest = x_interest,
-    desired_range = desired_range, box_init = box$box)
+    desired_range = desired_range, box_init = box$box, box_largest = box_largest)
 
   return(list(orig = box, postproc = boxpost))
 
@@ -59,14 +66,19 @@ prim_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
+  # Get data (either training or sampled in largest box)
+  filenam = paste0(paste(job$prob.name, arg_list$model_name, arg_list$id_x_interest, sep = "_"), ".rds")
+  obsdata = readRDS(file.path("dataeval/prod", paste0("data_inbox_", arg_list$datastrategy), filenam))
+  box_largest = readRDS(file.path("dataeval/prod/largest_box", filenam))
+
   method = Prim$new(pred, quiet = TRUE)
-  box = method$find_box(x_interest = x_interest, desired_range = desired_range)
+  box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
 
   # return(box)
 
   post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = TRUE)
   boxpost = post$find_box(x_interest = x_interest,
-    desired_range = desired_range, box_init = box$box)
+    desired_range = desired_range, box_init = box$box, box_largest = box_largest)
 
   return(list(orig = box, postproc = boxpost))
 }
@@ -83,14 +95,19 @@ anchors_wrapper = function(data, job, instance, ...) {
 
   pred$class = desired_class
 
+  # Get data (either training or sampled in largest box)
+  filenam = paste0(paste(job$prob.name, arg_list$model_name, arg_list$id_x_interest, sep = "_"), ".rds")
+  obsdata = readRDS(file.path("dataeval/prod", paste0("data_inbox_", arg_list$datastrategy), filenam))
+  box_largest = readRDS(file.path("dataeval/prod/largest_box", filenam))
+
   method = Anchor$new(pred, quiet = TRUE)
-  box = method$find_box(x_interest = x_interest, desired_range = desired_range)
+  box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
 
   # return(box)
 
   post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = TRUE)
   boxpost = post$find_box(x_interest = x_interest,
-    desired_range = desired_range, box_init = box$box)
+    desired_range = desired_range, box_init = box$box, box_largest = box_largest)
 
   return(list(orig = box, postproc = boxpost))
 }

@@ -1,3 +1,5 @@
+Sys.setenv(RETICULATE_PYTHON = "/home/susanne/.local/share/r-miniconda/envs/mlr3keras/bin/python")
+reticulate::use_condaenv("mlr3keras")
 packages = c("batchtools", "mlr3", "mlr3learners", "mlr3pipelines",
   "mlr3tuning", "mlr3keras", "rpart", "partykit", "iml")
 new_packages = packages[!(packages %in% installed.packages()[,"Package"])]
