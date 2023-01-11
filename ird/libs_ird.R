@@ -1,4 +1,6 @@
 # Sys.setenv('TF_CPP_MIN_LOG_LEVEL' = 2) #switch off messages
+Sys.setenv(RETICULATE_PYTHON = "/home/susanne/.local/share/r-miniconda/envs/mlr3keras/bin/python")
+reticulate::use_condaenv("mlr3keras")
 packages = c("devtools", "batchtools", "iml", "mlr3oml", "mlr3", "data.table", "R6", "keras", "mlr3keras")
 new_packages = packages[!(packages %in% installed.packages()[,"Package"])]
 if (length(new_packages) > 0L) install.packages(new_packages)
