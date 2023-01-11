@@ -53,10 +53,33 @@ extra_info_list = apply(gridspace, MARGIN = 1, function(row) {
   levelset = get_connected_samples(predictor = pred, x_interest = x_interest,
     desired_range = desired_range, num_sampled_points = 1000L, convexset = TRUE, resolution = 50L)
 
+  # GET LEVEL SET IN LARGEST BOX
+  get_closest_largest = function(data, x_interest, num) {
+    data = fsetdiff(data, x_interest)
+    if (nrow(data) >= num) {
+      nearest = order(gower::gower_dist(x_interest, data))
+      data = data[nearest,][1:num]
+    }
+    return(data)
+  }
+
+  levelsetlargest = levelset$training[identify_in_box(largest_box, levelset$training),]
+  levelsetlargest = get_closest_largest(levelsetlargest, x_interest, 5L)
+  missing = 5 - nrow(levelsetlargest) - 5
+  if (missing > 0) {
+    samplelargest = levelset$sampled[identify_in_box(largest_box, levelset$sampled),]
+    samplelargest = get_closest_largest(samplelargest, x_interest, missing)
+    levelsetlargest = rbind(levelsetlargest, samplelargest)
+  }
+
   filename = paste0(paste(data_name, model_name, id_x_interest, sep = "_"), ".rds")
   saveRDS(largest_box, file = file.path(folder_dir, "largest_box", filename))
   saveRDS(inboxdata, file = file.path(folder_dir, "data_inbox_train", filename))
   saveRDS(sampdata, file = file.path(folder_dir, "data_inbox_sampled", filename))
   saveRDS(levelset, file = file.path(folder_dir, "levelset", filename))
+  saveRDS(levelsetlargest, file = file.path(folder_dir, "levelsetlargest", filename))
 
 })
+
+
+lookup = expand.grid(model = model_names, data = data_names)
