@@ -8,21 +8,25 @@ ades = list(
   maire = CJ(
     id_x_interest = 1:5,
     model_name = models,
+    datastrategy = c("traindata", "sampled"),
     id_x_levelset = 1:5
   ),
   maxbox = CJ(
     id_x_interest = 1:5,
     model_name = models,
+    datastrategy = c("traindata", "sampled"),
     id_x_levelset = 1:5
   ),
   prim = CJ(
     id_x_interest = 1:5,
     model_name = models,
+    datastrategy = c("traindata", "sampled"),
     id_x_levelset = 1:5
   ),
   anchors = CJ(
     id_x_interest = 1:5,
     model_name = models,
+    datastrategy = c("traindata", "sampled"),
     id_x_levelset = 1:5
   )
 )

@@ -16,7 +16,7 @@ source("helpers/get_desired_range.R")
 # if (TEST) {
 #   source("ird/def_ird_test.R")
 # } else {
-  source("ird/def_ird.R")
+  source("robustness/def_robustness_x.R")
 # }
 
 # Create registry
@@ -56,22 +56,8 @@ addAlgorithm(name = "anchors", fun = anchors_wrapper)
 addExperiments(algo.designs = ades)
 summarizeExperiments()
 exp = unwrap(getJobPars())
-exp = exp[exp$id_x_interest == 1,]
 
-# exp[!duplicated(exp[c("problem", "algorithm", "model_name")])]
-
-# jobids = exp[id_x_interest == 1 & model_name != "hyperbox", "job.id", with = FALSE][[1]]
-
-# exp[model_name == "hyperbox" & problem == "diabetes",]
-
-# testJob(id = 3)
-
-# testJob(id = jobids[[1]])
-
-# for (id in jobids) {
-#   testJob(id = id)
-# }
-
+# testJob(1L)
 
 # Run
 submitJobs()
