@@ -146,16 +146,19 @@ nn_wrapper = function(data, job, instance, ...) {
     nn_learner = lrn("regr.kerasff", epochs = 500L,
       callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
   }
+
+  path = "models/prod/keras/neural_network"
+
+  if (job$prob.name == "plasma_retinol") {
+    nn_learner$train(this_task)
+    saveRDS(nn_learner, file.path(path, paste0(job$prob.name, "_lrn.rds")))
+    nn_learner$save(file.path(path, paste0(job$prob.name, "_model.hdf5")))
+    return(nn_learner)
+  }
+
   tune_ps = paradox::ParamSet$new(list(
     paradox::ParamInt$new("layer_units", lower = 1, upper = 20, tags = "train")
-    # paradox::ParamInt$new("units", lower = 1, upper = 20, tags = "train"),
-    # paradox::ParamDbl$new("learning_rate", lower = 10^-5, upper = 10^-1, tags = "train")
   ))
-  # tune_ps$trafo = function(x, param_set) {
-  #   x$model = get_keras_model(x$units, x$learning_rate)
-  #   x$learning_rate = x$units = NULL
-  #   return(x)
-  # }
 
   at = AutoTuner$new(
     learner = nn_learner,
@@ -168,7 +171,6 @@ nn_wrapper = function(data, job, instance, ...) {
   at$train(this_task)
   rr = resample(this_task, at, tc$outer_resampling, store_models = TRUE)
 
-  path = "models/prod/keras/neural_network"
   if (!dir.exists(dirname(path))) dir.create(dirname(path))
   if (!dir.exists(path)) dir.create(path)
   saveRDS(rr, file.path(path, paste0(job$prob.name, "_rr.rds")))

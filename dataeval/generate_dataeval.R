@@ -14,6 +14,7 @@ source("helpers/get_desired_range.R")
 # 1) Get largest box, newly sampled data and local level set
 #----
 gridspace = data.table(expand.grid(x_interest = id_x_interest, model = model_names, data = data_names))
+# gridspace = gridspace[which(gridspace$model == "neural_network" & gridspace$data == "plasma_retinol"), ]
 
 get_closest_largest = function(data, x_interest, num) {
   data = fsetdiff(data, x_interest)

@@ -13,6 +13,12 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
 
   if (is_keras) {
     model_dir = file.path("models/prod/keras", model_name)
+
+    if (data_name == "plasma_retinol") {
+      this_model = readRDS(file.path(model_dir, paste0(data_name, "_lrn.rds")))
+      this_model$load_model_from_file(file.path(model_dir, paste0(data_name, "_model.hdf5")))
+      pred = Predictor$new(this_model, data = data, y = target_name, type = type)
+    } else {
     path_pipeline = file.path(model_dir, paste0(data_name, "_po.rds"))
     pipeline = readRDS(path_pipeline)
     model_path = file.path(model_dir, paste0(data_name, "_model.hdf5"))
@@ -47,8 +53,9 @@ get_predictor = function(data, model_name, data_name, id_x_interest) {
         yhat
       },
       type = type
-    )
+      )
     pred$task = task
+    }
   } else {
     model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
     model_job_params = unwrap(getJobPars(reg = model_registry))
