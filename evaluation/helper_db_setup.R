@@ -1,5 +1,4 @@
 add_results_to_db = function(data_set_name, reg) {
-
   reg = loadRegistry(reg_dir, make.default = FALSE)
   job_overview = unwrap(getJobPars(reg = reg))
   jobs_of_this_data_set = job_overview[problem == data_set_name]
@@ -17,9 +16,12 @@ add_results_to_db = function(data_set_name, reg) {
 
     print(job_id)
     if (length(ird) > 0L) {
-
-      origeval = evaluate_quality(orig)
-      postproceval = evaluate_quality(postproc)
+      origeval = evaluate_quality(orig, data_set_name = this_job$problem,
+        model_name = this_job$model_name, id_x_interest = this_job$id_x_interest,
+        datastrategy = this_job$datastrategy)
+      postproceval = evaluate_quality(postproc, data_set_name = this_job$problem,
+        model_name = this_job$model_name, id_x_interest = this_job$id_x_interest,
+        datastrategy = this_job$datastrategy)
 
       dt_standard = cbind(rbind(origeval, postproceval), this_job,
         "time_running" = as.numeric(getJobStatus(this_job, reg)$time.running))

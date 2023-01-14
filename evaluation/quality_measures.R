@@ -1,6 +1,13 @@
-evaluate_quality = function(regdesc) {
-  pred = regdesc$.__enclos_env__$private$predictor
+evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, datastrategy) {
 
+  pred = regdesc$.__enclos_env__$private$predictor
+  data = pred$data$get.xy()
+
+  if (model_name == "neural_network") {
+    pred = get_predictor(data = data,
+      model_name = model_name, data_name = data_set_name, id_x_interest = id_x_interest)
+    pred$class = regdesc$class
+  }
   ## locality
   locality = identify_in_box(regdesc$box, data = regdesc$x_interest)
 
@@ -18,11 +25,13 @@ evaluate_quality = function(regdesc) {
   sampled_in_box = identify_in_box(regdesc$box, data = sampdata)
   coverage_sampled = mean(sampled_in_box)
 
-  # <FIXME:> ADD levelset evaluation of coverage
+  # levelset
+  levelset_dir = file.path("dataeval/prod/levelset", paste(data_set_name, model_name, id_x_interest, sep = "_"))
+  levelset = readRDS(paste0(levelset_dir, ".rds"))
   # levelset training
-  ## levelset = readRDS(...)
-
+  coverage_levelset_train = mean(identify_in_box(regdesc$box, data = levelset$training))
   # levelset sampled
+  coverage_levelset_sampled = mean(identify_in_box(regdesc$box, data = levelset$sampled))
 
   ## precision
   # precision train
@@ -41,20 +50,40 @@ evaluate_quality = function(regdesc) {
   }
 
   ## maximality
-  data = pred$data$get.x()
-  maximality = assess_maximality(regdesc, data = data)
+  # training data
+  maximality_train = assess_maximality(regdesc, pred = pred, data = data)
+  # sampled data
+  maximality_sampled = assess_maximality(regdesc, pred = pred, data = sampdata)
+
+  ## efficiency
+  #<FIXME:> replace by true call!
+  nrow_obsdata = nrow(readRDS(file.path(paste0("dataeval/prod/data_inbox_", datastrategy),
+    paste0(paste(data_set_name, model_name, id_x_interest, sep = "_"), ".rds"))))
+  ### get data
+  if (regdesc$method %in% c("Maire", "Prim", "MaxBox")) {
+    ### full dataset
+    efficiency = nrow_obsdata
+  } else if (regdesc$method == "Anchor") {
+    efficiency = nrow_obsdata * sample(7:15, 1)
+  } else if (regdesc$method == "PostProcessing") {
+    efficiency =  nrow_obsdata * sample(20:30, 1)
+  }
+
   ## robustness
+  # <FIXME>: Add!
 
   return(data.table(locality = locality, coverage_train = coverage_train,
-    coverage_sampled = coverage_sampled, precision_train = precision_train,
-    precision_sampled = precision_sampled, maximality = maximality))
+    coverage_sampled = coverage_sampled, coverage_levelset_train = coverage_levelset_train,
+    coverage_levelset_sampled = coverage_levelset_sampled,
+    precision_train = precision_train, precision_sampled = precision_sampled,
+    maximality_train = maximality_train, maximality_sampled = maximality_sampled,
+    efficiency = efficiency))
 
 }
 
 
-assess_maximality = function(regdesc, data) {
+assess_maximality = function(regdesc, pred, data) {
 
-  pred = regdesc$.__enclos_env__$private$predictor
   feat_nams = pred$data$feature.names
 
   for (j in feat_nams) {

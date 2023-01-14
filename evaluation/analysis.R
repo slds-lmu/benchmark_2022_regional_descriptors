@@ -8,10 +8,13 @@
 source("evaluation/analysis_helper.R")
 
 # RQ 1
-compare_methods(savepdf = FALSE)
 
+compare_methods(savepdf = TRUE, orientation = NULL, postprocessed = c(0),
+                 datastrategy = c("sampled", "traindata"))
+compare_methods(savepdf = TRUE, orientation = NULL, postprocessed = c(1),
+                datastrategy = c("sampled", "traindata"))
 # RQ 3
-compare_methods(postprocessed = c(0, 1), savepdf = FALSE)
+compare_methods(postprocessed = c(0, 1), orientation = "dataset", savepdf = FALSE)
 
 # RQ1 + RQ3
 comparison_table()
