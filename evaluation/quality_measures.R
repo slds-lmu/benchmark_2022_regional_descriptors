@@ -20,7 +20,7 @@ evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, d
   # newly sampled data
   ps = regdesc$.__enclos_env__$private$param_set
   set.seed(1234L)
-  sampdata = SamplerUnif$new(ps)$sample(n = pred$data$n.rows*2)$data
+  sampdata = SamplerUnif$new(ps)$sample(n = 1000)$data
   sampdata = ps$trafo(x = sampdata, predictor = pred)
   sampled_in_box = identify_in_box(regdesc$box, data = sampdata)
   coverage_sampled = mean(sampled_in_box)
