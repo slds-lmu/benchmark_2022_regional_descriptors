@@ -1,10 +1,10 @@
-# library(DBI)
-# library(magrittr)
-# library(data.table)
-# library(ggplot2)
-# library(tidyverse)
-# library(ggpubr)
-# library(scales)
+library(DBI)
+library(magrittr)
+library(data.table)
+library(ggplot2)
+library(tidyverse)
+library(ggpubr)
+library(scales)
 source("evaluation/analysis_helper.R")
 
 # RQ 1

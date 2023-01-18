@@ -21,7 +21,8 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
       filter(datastrategy %in% ds) %>%
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
-        logistic_regression = "logreg", neural_network = "neuralnet")) %>%
+        logistic_regression = "logreg", neural_network = "neuralnet"),
+        algorithm = factor(algorithm, levels = methods)) %>%
       filter(!model_name %in% "neuralnet") %>% #<FIXME:> allow neuralnet!
       pivot_longer(c(quality_measures), names_to = "quality") %>%
       mutate(quality = factor(quality, levels = quality_measures))
@@ -47,6 +48,8 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     mutate(group_id = cur_group_id()) %>%
     ungroup()
 
+  ll$postprocessed = factor(ll$postprocessed, levels = c(0, 1), label = c("without postproc", "with postproc"))
+  ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(datastrategy, rev(methods))[, c(2,1)], 1, paste, collapse="_"))
 
   # if (test) {
   #   create_test_df = function(data, subset = c("nice", "moc")) {
