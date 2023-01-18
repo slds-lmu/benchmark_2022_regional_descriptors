@@ -22,3 +22,6 @@ compare_methods(postprocessed = c(0, 1), orientation = "dataset", savepdf = FALS
 # RQ1 + RQ3
 create_runtime_maximality_table()
 
+source("evaluation/analysis_helper_test.R")
+statistical_analysis()
+
