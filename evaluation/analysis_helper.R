@@ -1,8 +1,8 @@
 compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
-    quality_measures = c("coverage_train", "coverage_sampled", "precision_train", "precision_sampled"),
+    quality_measures = c("coverage_train", "coverage_sampled", "precision_train", "precision_sampled"), # coverage_leverset_train, coverage_levelset_sampled
     postprocessed = c(0), datastrategy = c("traindata"), orientation = NULL, savepdf = FALSE) {
 
-  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol") # fixme add: plasma_retinol
+  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
   if (!is.null(orientation)) {
     checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
   }
@@ -16,16 +16,30 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
 
     pp = postprocessed
     ds = datastrategy
-    res_long = res %>%
+
+    if ("coverage_L_train" %in% quality_measures) {
+      res = res %>% rename(coverage_L_train = coverage_levelset_train,
+                                     coverage_L_sampled = coverage_levelset_sampled)
+    }
+
+
+    res = res %>%
       filter(postprocessed %in% pp) %>%
       filter(datastrategy %in% ds) %>%
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet"),
         algorithm = factor(algorithm, levels = methods)) %>%
-      filter(!model_name %in% "neuralnet") %>% #<FIXME:> allow neuralnet!
+
+       ###### FIXME: remove!!!!
+      filter(model_name != "neuralnet")
+    ###########
+
+
+    res_long = res %>%
       pivot_longer(c(quality_measures), names_to = "quality") %>%
       mutate(quality = factor(quality, levels = quality_measures))
+
 
     if (length(datastrategy) == 2) {
       res_long = res_long %>%
@@ -49,7 +63,7 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     ungroup()
 
   ll$postprocessed = factor(ll$postprocessed, levels = c(0, 1), label = c("without postproc", "with postproc"))
-  ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(datastrategy, rev(methods))[, c(2,1)], 1, paste, collapse="_"))
+  ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(rev(methods), datastrategy), 1, paste, collapse="_"))
 
   # if (test) {
   #   create_test_df = function(data, subset = c("nice", "moc")) {
@@ -134,7 +148,7 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
 
 comparison_table = function(methods = c("maxbox", "prim", "anchors", "maire"), orientation = "model", savextable = FALSE) {
   browser()
-  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol") #<FIXME>plasma_retinol
+  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
   checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
@@ -208,8 +222,7 @@ comparison_table = function(methods = c("maxbox", "prim", "anchors", "maire"), o
 }
 
 create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchors", "maire"), orientation = NULL, savextable = FALSE) {
-  browser()
-  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol") #<FIXME>plasma_retinol
+  data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
   if (!is.null(orientation)) {
     checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
   }
@@ -225,6 +238,12 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet")) %>%
+
+      ###### FIXME: remove!!!!
+      filter(model_name != "neuralnet") %>%
+    ###########
+
+
       pivot_longer(c("maximality_train", "maximality_sampled", "efficiency"), names_to = "quality") %>%
       mutate(quality = factor(quality, levels = c("maximality_train", "maximality_sampled", "efficiency")))
 
@@ -256,7 +275,6 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
   ll$datastrategy = as.character(ll$datastrategy)
   xtable(ll)
 
-  browser()
   # rle.lengths <- rle(ll[[1]])$lengths
   # first <- !duplicated(ll[[1]])
   # ll[[1]][!first] <- ""
