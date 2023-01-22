@@ -14,6 +14,16 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
 
+    # if (NEWRESULTS) {
+    #   res = res %>% filter(algorithm != "maxbox")
+    #
+    #   con_maxbox = dbConnect(RSQLite::SQLite(), "evaluation/db_evals_maxbox.db")
+    #   res_maxbox =tbl(con_maxbox, datanam) %>% collect()
+    #   DBI::dbDisconnect(con_maxbox)
+    #
+    #   res = rbind(res, res_maxbox)
+    # }
+
     pp = postprocessed
     ds = datastrategy
 
@@ -29,11 +39,7 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet"),
-        algorithm = factor(algorithm, levels = methods)) %>%
-
-       ###### FIXME: remove!!!!
-      filter(model_name != "neuralnet")
-    ###########
+        algorithm = factor(algorithm, levels = methods))
 
 
     res_long = res %>%
@@ -41,10 +47,10 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
       mutate(quality = factor(quality, levels = quality_measures))
 
 
-    if (length(datastrategy) == 2) {
-      res_long = res_long %>%
-        mutate(algorithm = paste(algorithm, datastrategy, sep = "_"))
-    }
+    # if (length(datastrategy) == 2) {
+    #   res_long = res_long %>%
+    #     mutate(algorithm = paste(algorithm, datastrategy, sep = "_"))
+    # }
 
     # if (length(postprocessed) == 2) {
     #   res_long = res_long %>%
@@ -63,7 +69,10 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     ungroup()
 
   ll$postprocessed = factor(ll$postprocessed, levels = c(0, 1), label = c("without postproc", "with postproc"))
-  ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(rev(methods), datastrategy), 1, paste, collapse="_"))
+  # ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(rev(methods), datastrategy), 1, paste, collapse="_"))
+  ll$algorithm = factor(ll$algorithm, levels = rev(methods))
+  ds = datastrategy
+  ll$datastrategy = factor(ll$datastrategy, levels = rev(ds))
 
   # if (test) {
   #   create_test_df = function(data, subset = c("nice", "moc")) {
@@ -97,14 +106,13 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
 
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
   n_colors = length(unique(ll$algorithm))
-
   plt = ggplot(ll) +
     geom_boxplot(aes(x = algorithm, y = value, fill = algorithm), show.legend = FALSE) +
     ylab("") +
     xlab("")
   if (is.null(orientation)) {
     if (all(c(0, 1) %in% postprocessed)) {
-      plt = plt + facet_grid(postprocessed ~ quality)
+      plt = plt + facet_grid(postprocessed + datastrategy ~ quality)
     } else {
       plt = plt + facet_wrap(~quality)
     }
@@ -130,8 +138,8 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     ) +
     coord_flip()
   # colorlines = "tan4"
-  plt = plt +
-    geom_line(aes(x = algorithm, y = value, group=group_id), alpha=0.2, color = "grey20")
+  # plt = plt +
+  #   geom_line(aes(x = algorithm, y = value, group=group_id), alpha=0.2, color = "grey20")
 
   if (savepdf) {
     fig.path = "evaluation/figures"
@@ -221,7 +229,8 @@ comparison_table = function(methods = c("maxbox", "prim", "anchors", "maire"), o
 
 }
 
-create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchors", "maire"), orientation = NULL, savextable = FALSE) {
+create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchors", "maire"),
+                  quality_measures = c("maximality_train", "maximality_sampled", "efficiency"), orientation = NULL, savextable = FALSE) {
   data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
   if (!is.null(orientation)) {
     checkmate::assert_names(orientation, subset.of = c("model", "dataset"))
@@ -234,18 +243,17 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
 
+    res = res %>% mutate(maximality_train = ifelse(precision_train == 1, maximality_train, 0),
+                         maximality_sampled = ifelse(precision_sampled == 1, maximality_sampled, 0)
+         #  maximality_sampled = ifelse(!is.na(precision_sampled), ifelse(precision_sampled == 1, maximality_sampled, 0), ifelse(precision_train == 1, maximality_sampled, 0))
+    )
+
     res_long = res %>%
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet")) %>%
-
-      ###### FIXME: remove!!!!
-      filter(model_name != "neuralnet") %>%
-    ###########
-
-
-      pivot_longer(c("maximality_train", "maximality_sampled", "efficiency"), names_to = "quality") %>%
-      mutate(quality = factor(quality, levels = c("maximality_train", "maximality_sampled", "efficiency")))
+      pivot_longer(quality_measures, names_to = "quality") %>%
+      mutate(quality = factor(quality, levels = quality_measures))
 
     # res_long = res_long %>%
     #   mutate(algorithm = paste(algorithm, datastrategy, sep = "_"))
@@ -253,7 +261,6 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
     return(res_long)
 
   })
-
   names(aggrres) = data_set_names
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
   ll$datastrategy = factor(ll$datastrategy, levels = c("traindata", "sampled"))
@@ -267,11 +274,12 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
     # select(-mean, -sd) %>%
     ungroup %>%
     pivot_wider(names_from = c("quality", "postprocessed"), values_from = "value") %>%
-    mutate(efficiency_0 = round(efficiency_0, 0),
-      efficiency_1 = round(efficiency_1, 0)) %>%
+    # mutate(efficiency_0 = round(efficiency_0, 0),
+    #   efficiency_1 = round(efficiency_1, 0)) %>%
     arrange(datastrategy) %>%
-    select(datastrategy, algorithm, starts_with(c("maximality_train", "maximality_sampled", "efficiency")))
+    select(datastrategy, algorithm, starts_with(quality_measures))
 
+  ll$algorithm = factor(ll$algorithm, levels = methods)
   ll$datastrategy = as.character(ll$datastrategy)
   xtable(ll)
 

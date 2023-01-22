@@ -5,22 +5,24 @@ library(ggplot2)
 library(tidyverse)
 library(ggpubr)
 library(scales)
+library(xtable)
 source("evaluation/analysis_helper.R")
 
 # RQ 1
-compare_methods(savepdf = F, orientation = NULL,
+compare_methods(savepdf = TRUE, orientation = NULL,
                 datastrategy = c("sampled", "traindata"), postprocessed = c(0, 1),
-                quality_measures =  c("coverage_train", "coverage_sampled",
+                quality_measures =  c("coverage_L_train", "coverage_sampled",
                                       "precision_train", "precision_sampled"))
 # compare_methods(savepdf = FALSE, orientation = NULL, postprocessed = c(0),
 #                  datastrategy = c("sampled", "traindata"))
 # compare_methods(savepdf = TRUE, orientation = NULL, postprocessed = c(1),
 #                 datastrategy = c("sampled", "traindata"))
 # RQ 3
-compare_methods(postprocessed = c(0, 1), orientation = "dataset", savepdf = FALSE)
+# compare_methods(postprocessed = c(0, 1), orientation = "dataset", savepdf = FALSE)
 
 # RQ1 + RQ3
-create_runtime_maximality_table()
+create_runtime_maximality_table(
+  quality_measures = c("maximality_train", "maximality_sampled", "efficiency"))
 
 source("evaluation/analysis_helper_test.R")
 statistical_analysis()

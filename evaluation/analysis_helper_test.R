@@ -1,10 +1,9 @@
 statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire"),
-  quality_measure = c("coverage_train"),
-  postprocessed = c(0, 1), datastrategy = c("traindata", "sampled")) {
+  quality_measures = c("coverage_train", "coverage_sampled", "coverage_levelset_train", "coverage_levelset_sampled",
+                       "precision_train", "precision_sampled")) {
 
+  browser()
   data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
-
-  checkmate::assert_names(datastrategy, subset.of = c("traindata", "sampled"))
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
@@ -12,20 +11,15 @@ statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
 
-    pp = postprocessed
-    ds = datastrategy
-
-    if ("coverage_L_train" %in% quality_measure) {
+    if ("coverage_L_train" %in% quality_measures) {
       res = res %>% rename(coverage_L_train = coverage_levelset_train)
     }
 
-    if ("coverage_L_sampled" %in% quality_measure) {
+    if ("coverage_L_sampled" %in% quality_measures) {
       res = res %>% rename(coverage_L_sampled = coverage_levelset_sampled)
     }
 
     res = res %>%
-      filter(postprocessed %in% pp) %>%
-      filter(datastrategy %in% ds) %>%
       filter(algorithm %in% methods) %>%
       mutate(model_name = recode(model_name, ranger = "randomforest",
         logistic_regression = "logreg", neural_network = "neuralnet"),
@@ -38,27 +32,33 @@ statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire
 
   names(aggrres) = data_set_names
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
+  ll$algorithm = factor(ll$algorithm, methods)
 
   browser()
 
-  rq1 = ll %>%
-    pivot_wider(names_from = algorithm, values_from = quality_measure,
-      id_cols = c("problem", "model_name", "id_x_interest", "datastrategy", "postprocessed")) %>%
-    na.omit() %>%
-    filter(postprocessed == 0 & datastrategy == "traindata")
+  rq1 = ll %>% filter(postprocessed == 0 & datastrategy == "traindata")
 
-  friedman.test(as.matrix(rq1[, c("maire", "maxbox", "prim", "anchors")]))
-  # unterscheiden sich
-  lookup = expand_grid(a = methods, b = methods)
-  t = apply(lookup, MARGIN = 1L, FUN = function(row) {
-    wilcox.test(x = rq1[[row[[1]]]], y = rq1[[row[[2]]]], alternative = "greater",
-      paired = TRUE, exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
-  })
-  # anchors zu anderen gleich, maxbox/prim/maire unterscheiden sich
-  lookup$p = t
+  for (measure in quality_measures) {
+      rq1a = rq1 %>%
+        pivot_wider(names_from = algorithm, values_from = measure,
+          id_cols = c("problem", "model_name", "id_x_interest", "datastrategy", "postprocessed")) %>%
+        na.omit()
+
+    round(friedman.test(as.matrix(rq1a[, c("maire", "maxbox", "prim", "anchors")]))$p.value, 3)
+    # unterscheiden sich
+    lookup = expand_grid(a = methods, b = methods)
+    t = apply(lookup, MARGIN = 1L, FUN = function(row) {
+      wilcox.test(x = rq1a[[row[[1]]]], y = rq1a[[row[[2]]]], alternative = "greater",
+        paired = TRUE, exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
+    })
+  lookup$p = round(t, 3)
   message("H0: approaches perform equally well")
-  print(dcast(lookup, a ~ b))
+  message(measure)
+  print(xtable(dcast(lookup, a ~ b), digits = 3))
+  }
+  # anchors zu anderen gleich, maxbox/prim/maire unterscheiden sich
 
+  browser()
   rq2 = ll %>%
     pivot_wider(names_from = datastrategy, values_from = quality_measure,
       id_cols = c("problem", "model_name", "id_x_interest", "algorithm", "postprocessed")) %>%

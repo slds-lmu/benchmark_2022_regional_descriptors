@@ -6,7 +6,7 @@ evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, d
   if (model_name == "neural_network") {
     pred = get_predictor(data = data,
       model_name = model_name, data_name = data_set_name, id_x_interest = id_x_interest)
-    pred$class = regdesc$class
+    pred$class = regdesc$desired_class
   }
   ## locality
   locality = identify_in_box(regdesc$box, data = regdesc$x_interest)
@@ -18,7 +18,9 @@ evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, d
   coverage_train = mean(train_in_box)
 
   # newly sampled data
-  ps = regdesc$.__enclos_env__$private$param_set
+  largest_box_dir = file.path("dataeval/prod/largest_box/", paste(data_set_name, model_name, id_x_interest, sep = "_"))
+  ps = readRDS(paste0(largest_box_dir, ".rds"))
+  # ps = regdesc$.__enclos_env__$private$param_set
   set.seed(1234L)
   sampdata = SamplerUnif$new(ps)$sample(n = 1000)$data
   sampdata = ps$trafo(x = sampdata, predictor = pred)
@@ -56,18 +58,8 @@ evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, d
   maximality_sampled = assess_maximality(regdesc, pred = pred, data = sampdata)
 
   ## efficiency
-  #<FIXME:> replace by true call!
-  nrow_obsdata = nrow(readRDS(file.path(paste0("dataeval/prod/data_inbox_", datastrategy),
-    paste0(paste(data_set_name, model_name, id_x_interest, sep = "_"), ".rds"))))
-  ### get data
-  if (regdesc$method %in% c("Maire", "Prim", "MaxBox")) {
-    ### full dataset
-    efficiency = nrow_obsdata
-  } else if (regdesc$method == "Anchor") {
-    efficiency = nrow_obsdata * sample(7:15, 1)
-  } else if (regdesc$method == "PostProcessing") {
-    efficiency =  nrow_obsdata * sample(20:30, 1)
-  }
+  efficiency = attr(regdesc, "calls_fhat")
+  runtime = attr(regdesc, "runtime")
 
   ## robustness
   # <FIXME>: Add!
@@ -77,7 +69,7 @@ evaluate_quality = function(regdesc, data_set_name, model_name, id_x_interest, d
     coverage_levelset_sampled = coverage_levelset_sampled,
     precision_train = precision_train, precision_sampled = precision_sampled,
     maximality_train = maximality_train, maximality_sampled = maximality_sampled,
-    efficiency = efficiency))
+    efficiency = efficiency, runtime = runtime))
 
 }
 
