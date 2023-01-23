@@ -10,15 +10,34 @@ source("evaluation/analysis_helper.R")
 
 # RQ 1
 compare_methods(savepdf = TRUE, orientation = NULL,
-                datastrategy = c("sampled", "traindata"), postprocessed = c(0, 1),
-                quality_measures =  c("coverage_L_train", "coverage_sampled",
-                                      "precision_train", "precision_sampled"))
-# compare_methods(savepdf = FALSE, orientation = NULL, postprocessed = c(0),
-#                  datastrategy = c("sampled", "traindata"))
-# compare_methods(savepdf = TRUE, orientation = NULL, postprocessed = c(1),
-#                 datastrategy = c("sampled", "traindata"))
-# RQ 3
-# compare_methods(postprocessed = c(0, 1), orientation = "dataset", savepdf = FALSE)
+  datastrategy = c("sampled", "traindata"), postprocessed = c(0, 1),
+  quality_measures =  c("coverage_L_train", "coverage_sampled",
+    "precision_train", "precision_sampled"))
+
+
+quality = c("coverage_L_train", "coverage_L_sampled",
+  "coverage_train", "coverage_sampled",
+  "precision_train", "precision_sampled")
+
+# no post-processing, dataset
+compare_methods(savepdf = TRUE, orientation = "dataset", postprocessed = c(0),
+  datastrategy = c("sampled", "traindata"),
+  quality_measures =  quality)
+
+# no post-processing, models
+compare_methods(savepdf = TRUE, orientation = "model", postprocessed = c(0),
+  datastrategy = c("sampled", "traindata"),
+  quality_measures =  quality)
+
+# post-processing, dataset
+compare_methods(savepdf = TRUE, orientation = "dataset", postprocessed = c(1),
+  datastrategy = c("sampled", "traindata"),
+  quality_measures =  quality)
+
+# post-processing, models
+compare_methods(savepdf = TRUE, orientation = "model", postprocessed = c(1),
+  datastrategy = c("sampled", "traindata"),
+  quality_measures =  quality)
 
 # RQ1 + RQ3
 create_runtime_maximality_table(
