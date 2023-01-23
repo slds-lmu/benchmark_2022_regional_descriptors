@@ -1,8 +1,7 @@
 statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire"),
   quality_measures = c("coverage_train", "coverage_sampled", "coverage_levelset_train", "coverage_levelset_sampled",
-                       "precision_train", "precision_sampled")) {
+    "precision_train", "precision_sampled")) {
 
-  browser()
   data_set_names = c("diabetes", "tic_tac_toe", "cmc", "vehicle", "no2", "plasma_retinol")
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
@@ -25,7 +24,7 @@ statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire
         logistic_regression = "logreg", neural_network = "neuralnet"),
         algorithm = factor(algorithm, levels = methods))%>%
       filter(model_name != "neuralnet")
-      # select(algorithm, quality_measure)
+    # select(algorithm, quality_measure)
 
     return(res)
   })
@@ -34,103 +33,148 @@ statistical_analysis = function (methods = c("maxbox", "prim", "anchors", "maire
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
   ll$algorithm = factor(ll$algorithm, methods)
 
-  browser()
+
+  ########### RQ 1 #############
 
   rq1 = ll %>% filter(postprocessed == 0 & datastrategy == "traindata")
 
+  combinations = t(combn(methods, 2))
+  colnams = apply(combinations, MARGIN = 1, function(comb) {
+    paste(comb[[1]], "=", comb[[2]])
+  })
+
+  no = nrow(combinations)*length(quality_measures)
+  print(no)
+  alpha = 0.05/no
+
+  restable = setNames(data.frame(matrix(ncol = nrow(combinations)+1, nrow = 0)), c("measure", colnams))
+
   for (measure in quality_measures) {
-      rq1a = rq1 %>%
-        pivot_wider(names_from = algorithm, values_from = measure,
-          id_cols = c("problem", "model_name", "id_x_interest", "datastrategy", "postprocessed")) %>%
+
+    rq1a = rq1 %>%
+      pivot_wider(names_from = algorithm, values_from = measure,
+        id_cols = c("problem", "model_name", "id_x_interest", "datastrategy", "postprocessed")) %>%
+      na.omit()
+
+    testresults = apply(combinations, MARGIN = 1, function(comb) {
+      print(comb)
+      if (all(rq1a[[comb[[1]]]] == rq1a[[comb[[2]]]])) {
+        t = 1
+      } else {
+        t = round(wilcox.test(x = rq1a[[comb[[1]]]], y = rq1a[[comb[[2]]]], alternative = "two.sided",
+          paired = TRUE, exact = FALSE, conf.int = FALSE)$p.value, 3)
+      }
+      if (t <= alpha) {
+        t = paste0('\\textbf{', t,'}')
+      }
+      return(t)
+    }
+    )
+
+    resrow = setNames(data.frame(measure, t(testresults)), c("measure", colnams))
+    restable = rbind(restable, resrow)
+  }
+
+  restable$measure = gsub(pattern = "_", replacement = "\\\\_", x = restable$measure)
+
+  message("RQ 1")
+  print(xtable(restable), sanitize.text.function=I, include.rownames = FALSE)
+
+
+  ################ RQ 2 ##############
+
+  rq2 = ll %>% filter(postprocessed == 0)
+
+  no = (length(methods)+1)*length(quality_measures)
+  print(no)
+  alpha = 0.05/no
+
+  restable2 = setNames(data.frame(matrix(ncol = length(methods)+2, nrow = 0)), c("measure", "overall", methods))
+
+  for (measure in quality_measures) {
+
+    rq2a = ll %>%
+      pivot_wider(names_from = datastrategy, values_from = measure,
+        id_cols = c("problem", "model_name", "id_x_interest", "algorithm", "postprocessed")) %>%
+      na.omit()
+
+    overall = round(wilcox.test(x = rq2a[["traindata"]], y = rq2a[["sampled"]],  exact = FALSE,
+      paired = TRUE, conf.int = FALSE, alternative = "less")$p.value, 3)
+
+    testresults2 = sapply(methods, function(method) {
+
+      x = rq2a[rq2a$algorithm == method,]$traindata
+      y = rq2a[rq2a$algorithm == method,]$sampled
+      if (all(x == y)) {
+        t = 1
+      } else {
+        t = round(wilcox.test(x = x, y = y,  exact = FALSE,
+          paired = TRUE, conf.int = FALSE, alternative = "less")$p.value, 3)
+      }
+      if (t <= alpha) {
+        t = paste0('\\textbf{', t,'}')
+      }
+      return(t)
+    }
+    )
+
+    resrow = setNames(data.frame(measure, overall, t(testresults2)), c("measure", "overall", methods))
+    restable2 = rbind(restable2, resrow)
+  }
+
+  restable2$measure = gsub(pattern = "_", replacement = "\\\\_", x = restable2$measure)
+
+  message("RQ 2")
+  print(xtable(restable2), sanitize.text.function=I, include.rownames = FALSE)
+
+  ################ RQ 3 ##############
+
+  rq3 = ll
+
+  no = ((length(methods)+1)*2)*length(quality_measures)
+  print(no)
+  alpha = 0.05/no
+
+  restable3 = setNames(data.frame(matrix(ncol = length(quality_measures)+1, nrow = 2*length(methods)+2)), c("method", quality_measures))
+  restable3$method = c("\\textbf{traindata}", methods, "\\textbf{sampled}", methods)
+
+  for (measure in quality_measures) {
+
+    testresults3 = sapply (c("traindata", "sampled"), function(strategy) {
+
+      rq3a = ll %>%
+        filter(datastrategy == strategy) %>%
+        pivot_wider(names_from = postprocessed, values_from = measure,
+          id_cols = c("problem", "model_name", "id_x_interest", "algorithm")) %>%
         na.omit()
 
-    round(friedman.test(as.matrix(rq1a[, c("maire", "maxbox", "prim", "anchors")]))$p.value, 3)
-    # unterscheiden sich
-    lookup = expand_grid(a = methods, b = methods)
-    t = apply(lookup, MARGIN = 1L, FUN = function(row) {
-      wilcox.test(x = rq1a[[row[[1]]]], y = rq1a[[row[[2]]]], alternative = "greater",
-        paired = TRUE, exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
+      overall = round(wilcox.test(x = rq3a[["0"]], y = rq3a[["1"]],  exact = FALSE,
+        paired = TRUE, conf.int = FALSE, alternative = "less")$p.value, 3)
+
+      testresults3a = sapply(methods, function(method) {
+
+        x = rq3a[rq3a$algorithm == method,]$`0`
+        y = rq3a[rq3a$algorithm == method,]$`1`
+
+        if (all(x == y)) {
+          t = 1
+        } else {
+          t = round(wilcox.test(x = x, y = y,  exact = FALSE,
+            paired = TRUE, conf.int = FALSE, alternative = "less")$p.value, 3)
+        }
+        if (t <= alpha) {
+          t = paste0('\\textbf{', t,'}')
+        }
+        return(t)
+      }
+      )
+      return(c(overall, testresults3a))
     })
-  lookup$p = round(t, 3)
-  message("H0: approaches perform equally well")
-  message(measure)
-  print(xtable(dcast(lookup, a ~ b), digits = 3))
+    rescol = c(testresults3[, 1], testresults3[, 2])
+    restable3[[measure]] = rescol
   }
-  # anchors zu anderen gleich, maxbox/prim/maire unterscheiden sich
+  names(restable3) = gsub(pattern = "_", replacement = "\\\\_", x = names(restable3))
 
-  browser()
-  rq2 = ll %>%
-    pivot_wider(names_from = datastrategy, values_from = quality_measure,
-      id_cols = c("problem", "model_name", "id_x_interest", "algorithm", "postprocessed")) %>%
-    na.omit() %>%
-    filter(postprocessed == 0)
-
-  message("H0: traindata < sampled")
-  print(wilcox.test(x = rq2[["traindata"]], y = rq2[["sampled"]],  exact = FALSE,
-    paired = TRUE, correct = FALSE, conf.int = FALSE, alternative = "greater")$p.value)
-  # insgesamt lohnts sich schon!
-
-  t2 = lapply(methods, function(method) {
-  wilcox.test(x = rq2[rq2$algorithm == method,]$traindata,
-    y = rq2[rq2$algorithm == method,]$sampled,  exact = FALSE,
-    paired = TRUE, correct = FALSE, conf.int = FALSE, alternative = "greater")$p.value
-  })
-
-  cbind(methods, t2)
-  # für maxbox, prim bringts was, für anchors und maire weniger!
-
-  rq3 = ll %>%
-    pivot_wider(names_from = postprocessed, values_from = quality_measure,
-      id_cols = c("problem", "model_name", "id_x_interest", "algorithm", "datastrategy")) %>%
-    na.omit()
-
-  message("H0: no postprocessing < postprocessing")
-  print(wilcox.test(x = rq3[["0"]], y = rq3[["1"]],  exact = FALSE,
-    paired = TRUE, correct = FALSE, conf.int = FALSE, alternative = "greater")$p.value)
-  t3 = lapply(methods, function(method) {
-    data = rq3 %>% filter(datastrategy == "sampled")
-    wilcox.test(x = data[data$algorithm == method,"0"][[1]],
-      y = data[data$algorithm == method,"1"][[1]],  exact = FALSE,
-      paired = TRUE, correct = FALSE, conf.int = FALSE, alternative = "greater")$p.value
-  })
-  message("H0: no postprocessing < postprocessing, sampled")
-  print(cbind(methods, t3))
-
-  t3 = lapply(methods, function(method) {
-    data = rq3 %>% filter(datastrategy == "traindata")
-    wilcox.test(x = data[data$algorithm == method,"0"][[1]],
-      y = data[data$algorithm == method,"1"][[1]],  exact = FALSE,
-      paired = TRUE, correct = FALSE, conf.int = FALSE, alternative = "greater")$p.value
-  })
-  message("H0: no postprocessing < postprocessing, traindata")
-  print(cbind(methods, t3))
-
+  message("RQ 3")
+  print(xtable(restable3), sanitize.text.function=I, include.rownames = FALSE)
 }
-
-
-create_test_df = function(data, method = c("nice", "moc")) {
-    browser()
-    testdata = data %>% filter(algorithm %in% method)
-    testdata$algorithm = factor(testdata$algorithm, labels = method, levels = method)
-    if (orientation == "model") {
-      stratif = unique(testdata$model_name)
-      names(testdata)[which(names(testdata) == "model_name")] = "stratif"
-      lookup = expand.grid(stratif, unique(testdata$objective)[-4])
-      names(lookup) = c("model_name", "objective")
-    } else if (orientation == "dataset") {
-      stratif = unique(testdata$dataset)
-      names(testdata)[which(names(testdata) == "dataset")] = "stratif"
-      lookup = expand.grid(stratif, unique(testdata$objective)[-4])
-      names(lookup) = c("dataset", "objective")
-    }
-    t = apply(lookup, MARGIN = 1L, FUN = function(row) {
-      wilcox.test(value ~ algorithm, data = testdata %>% filter(stratif == row[[1]], objective == row[[2]]),
-        exact = FALSE, correct = FALSE, conf.int = FALSE)$p.value
-    })
-    lookup$p.signif = ifelse(t > 0.1, "ns", ifelse(t > 0.05, ".", ifelse(t > 0.01, "*", ifelse(t > 0.001, "**", "***"))))
-    lookup$p = ""
-    lookup$group1 = method[1]
-    lookup$group2 = method[2]
-    lookup$.y. = "value"
-    lookup = tibble::as_tibble(lookup)
-  }
