@@ -14,6 +14,20 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
 
+
+    if (any(c("robustness_train", "robustness_sampled") %in% quality_measures)) {
+      conres = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x.db")
+      resrobustness = tbl(conres, datanam) %>% collect()
+      DBI::dbDisconnect(conres)
+      resrobustness = resrobustness %>% select(job.id, problem, algorithm, id_x_interest, model_name, datastrategy,
+                               postprocessed, robustness_traindata, robustness_sampled) %>%
+        filter(algorithm != "anchors") %>%
+        mutate(robustness_traindata = 1 - robustness_traindata,
+               robustness_sampled = 1 - robustness_sampled)
+      res = merge(res, resrobustness, by = c("job.id", "problem", "algorithm", "id_x_interest",
+                                       "model_name", "datastrategy", "postprocessed"), all = TRUE)
+    }
+
     # if (NEWRESULTS) {
     #   res = res %>% filter(algorithm != "maxbox")
     #
@@ -283,9 +297,9 @@ create_runtime_maximality_table = function(methods = c("maxbox", "prim", "anchor
     # mutate(value = paste0(mean, " (", sd, ")")) %>%
     # select(-mean, -sd) %>%
     ungroup %>%
-    pivot_wider(names_from = c("quality", "postprocessed"), values_from = "value") %>%
-    # mutate(efficiency_0 = round(efficiency_0, 0),
-    #   efficiency_1 = round(efficiency_1, 0)) %>%
+    pivot_wider(names_from = c("quality", "postprocessed"), values_from = "value") # %>%
+    # mutate(efficiency_1 = efficiency_0 + efficiency_1,
+    #        efficiency_rel = efficiency_1/efficiency_0) %>%
     arrange(datastrategy) %>%
     select(datastrategy, algorithm, starts_with(quality_measures))
 
