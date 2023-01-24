@@ -116,13 +116,24 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
     } else {
       plt = plt + facet_wrap(~quality)
     }
-    height = 4
+    height = 3
+    width = 7
   } else if (orientation == "model") {
-    plt = plt +  facet_grid(model_name ~ quality, scales = "free")
-    height = 10
+    if (all(c("traindata", "sampled") %in% datastrategy)) {
+      plt = plt + facet_grid(model_name + datastrategy ~ quality)
+    } else {
+      plt = plt +  facet_grid(model_name ~ quality, scales = "free")
+    }
+    height = 8.5
+    width = 9.5
   } else if (orientation == "dataset") {
-    plt = plt + facet_grid(dataset ~ quality, scales = "free")
-    height = 7.5
+    if (all(c("traindata", "sampled") %in% datastrategy)) {
+      plt = plt + facet_grid(dataset + datastrategy ~ quality)
+    } else {
+      plt = plt +  facet_grid(dataset ~ quality, scales = "free")
+    }
+    height = 12
+    width = 9.5
   }
   # mindata = left_join(x = minid, y = ll, by = c("model_name", "algorithm", "id", "dataset"))
   plt = plt +
@@ -144,11 +155,10 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
   if (savepdf) {
     fig.path = "evaluation/figures"
     dir.create(fig.path, showWarnings = FALSE)
-    height = 3
     ggsave(filename = file.path(fig.path, paste0(paste("comparison_methods",
       orientation, paste0(datastrategy, collapse = "_"),
       paste0(postprocessed, collapse = "_"), sep = "_"), ".pdf")),
-      plot = plt, width = 7, height = height) # 5.5, 3.8
+      plot = plt, width = width, height = height) # 5.5, 3.8
   }
 
   return(plt)
