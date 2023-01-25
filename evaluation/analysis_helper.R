@@ -17,6 +17,7 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
 
     if (any(c("robustness_train", "robustness_sampled") %in% quality_measures)) {
       conres = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x.db")
+      # all
       resrobustness = tbl(conres, datanam) %>% collect()
       DBI::dbDisconnect(conres)
       resrobustness = resrobustness %>% select(job.id, problem, algorithm, id_x_interest, model_name, datastrategy,
@@ -24,8 +25,21 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
         filter(algorithm != "anchors") %>%
         mutate(robustness_traindata = 1 - robustness_traindata,
                robustness_sampled = 1 - robustness_sampled)
-      res = merge(res, resrobustness, by = c("job.id", "problem", "algorithm", "id_x_interest",
+
+            # if (datanam == "diabetes") {
+            #     #anchors
+            #     conres = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x_anchors.db")
+            #     resanchors = tbl(conres, datanam) %>% collect()
+            #     DBI::dbDisconnect(conres)
+            #     resanchors = resanchors %>% select(job.id, problem, algorithm, id_x_interest, model_name, datastrategy,
+            #                              postprocessed, robustness_traindata, robustness_sampled) %>%
+            #       mutate(robustness_traindata = 1 - robustness_traindata,
+            #              robustness_sampled = 1 - robustness_sampled)
+            #     resrobustness = rbind(resrobustness, resanchors)
+            # }
+       res = merge(res, resrobustness, by = c("job.id", "problem", "algorithm", "id_x_interest",
                                        "model_name", "datastrategy", "postprocessed"), all = TRUE)
+
     }
 
     # if (NEWRESULTS) {
@@ -51,8 +65,8 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
       filter(postprocessed %in% pp) %>%
       filter(datastrategy %in% ds) %>%
       filter(algorithm %in% methods) %>%
-      mutate(model_name = recode(model_name, ranger = "randomforest",
-        logistic_regression = "logreg", neural_network = "neuralnet"),
+      mutate(model_name = recode(model_name, ranger = "random forest",
+        linear_model = "linear model", neural_network = "neural net"),
         algorithm = factor(algorithm, levels = methods))
 
 
