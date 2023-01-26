@@ -42,6 +42,6 @@
 #### 6.2) Analysis
 
 - Creates box plots for comparing the irds of the different methods w.r.t to several evaluation measures
-- Creates box plots for comparing the speed of the different methods
+- Creates tables for maximality and efficiency, as well as for statistical tests
 - All data are queried from the database `db_evals.db`
 - Main functions: `analysis.R`
