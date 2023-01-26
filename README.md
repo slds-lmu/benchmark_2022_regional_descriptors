@@ -15,7 +15,7 @@
 - The neural network had to be saved differently due to keras (the autotuner could not be saved as usual; the models need to be stored as `.hdf5` files)
 - Main functions: `train_models.R`, `resample.R`, `get_resample_results.R`
 
-### 3) Evaluate Data using Model Info
+### 3) Evaluate Data using Model Info (dateval/)
 
 - Creates metainfos that is used as an input for the IRD methods and for the evaluation
 - For each model, dataset and x_interest the following is saved: (1) the largest, local box, (2) training data in the largest, local box, (3) sampled data in the largest local box, (4) connected, convex levelset L
