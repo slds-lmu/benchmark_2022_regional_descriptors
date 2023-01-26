@@ -29,5 +29,5 @@ ades = list(
 
 # BATCHTOOLS configurations
 n_cores = 14L
-registry_dir = "ird/prod/registry_test_datastrategy"
+registry_dir = "ird/prod/registry"
 if (!dir.exists(dirname(registry_dir))) dir.create(dirname(registry_dir))
