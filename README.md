@@ -23,18 +23,23 @@
 
 ### 4) Interpretable Regional Descriptors (ird/)
 
-- Runs the IRD methods for all datasets, models and `x_interest`, and stores the IRDs as `RegDescMethod`s.
+- Runs the IRD methods for all datasets, models and `x_interest`, and stores the IRDs as `RegDescMethod`s
 - Methods: MaxBox, PRIM, Anchors, MAIRE
 - Main functions: `find_ird.R`
 
-### 5) Evaluation (evaluation/)
+### 5) Robustness (robustness/) 
 
-#### 5.1) DB setup
+- Evaluates the robustness of IRD methods by repeating the box building processes 5 times and computing the robustness measure which is saved in a sql_lite databsae (`db_robustness_x.db`)
+- Main functions: `assess_robustness_x.R` and `db_setup_robustness.R`
+
+### 6) Evaluation (evaluation/)
+
+#### 6.1) DB setup
 
 - Reads in the `RegDescMethod` objects, evaluates the irds and stores them in a sql_lite database (`db_evals.db`)
 - Main functions: `db_setup.R`
 
-#### 5.2) Analysis
+#### 6.2) Analysis
 
 - Creates box plots for comparing the irds of the different methods w.r.t to several evaluation measures
 - Creates box plots for comparing the speed of the different methods
