@@ -9,7 +9,6 @@ TEST = FALSE
 # Setup
 source("ird/libs_ird.R")
 source("ird/helper_irdmethods_wrapper.R")
-source("ird/get_predictor_and_x_interest_pp.R")
 source("helpers/get_predictor.R")
 source("helpers/get_desired_range.R")
 source("ird/def_ird.R")

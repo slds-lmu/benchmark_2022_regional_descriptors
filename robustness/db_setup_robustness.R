@@ -1,9 +1,9 @@
 source("evaluation/libs_evaluate.R")
-source("robustness/compute_overlap_x.R")
+source("robustness/helper_db_setup_robustness.R")
 source("helpers/get_predictor.R")
 
 ## --------------
-reg_dir = "ird/prod/registry_new/"
+reg_dir = "ird/prod/registry/"
 reg = loadRegistry(reg_dir, make.default = FALSE)
 regrobust = loadRegistry("robustness/prod/registry_robustness_x/", make.default = FALSE)
 data_list = readRDS("data/data_storage/data_list.RDS")
