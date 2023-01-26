@@ -8,14 +8,9 @@ TEST = FALSE
 
 # Setup
 source("models/libs_models.R")
+source("models/helper_model_wrapper.R")
+source("models/def_model.R")
 
-# if (TEST) {
-#   source("models/helper_model_wrapper_test.R")
-#   source("models/def_model_test.R")
-# } else {
-  source("models/helper_model_wrapper.R")
-  source("models/def_model.R")
-# }
 
 # Create registry
 OVERWRITE <- TRUE
@@ -73,22 +68,8 @@ if (!dir.exists(keras_save_dir)) {
   dir.create(keras_save_dir)
 }
 
-# Test jobs
-# for (i in jobs$job.id) {
-#   print(i)
-#   a = testJob(id = i)
-# }
-# #
-# testJob(4L)
-# unlink(keras_save_dir, recursive = TRUE)
-# dir.create(keras_save_dir)
-
 # Run
 submitJobs()
 waitForJobs()
 getStatus()
 
-# Resubmit Jobs
-# gj = getJobPars(reg = reg)
-# logjobs = gj[gj$algorithm == "logistic_regression", "job.id"]
-# submitJobs(ids = logjobs)

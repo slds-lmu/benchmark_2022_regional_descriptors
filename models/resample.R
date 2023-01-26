@@ -1,16 +1,12 @@
 library(mlr3)
 library(batchtools)
 library(mlr3tuning)
-# source("models/libs_models.R")
+source("models/libs_models.R")
 
 model_registry = loadRegistry("models/prod/registry", make.default = FALSE)
 model_job_params = unwrap(getJobPars(reg = model_registry))
 data_list <- readRDS("data/data_storage/data_list.RDS")
 if (!dir.exists("models/prod/resampling")) dir.create("models/prod/resampling")
-
-# model_job_params = model_job_params[model_job_params$algorithm != "hyperbox",]
-#
-# model_job_params = model_job_params[c(-1, -2, -3),]
 
 for (i in model_job_params$job.id) {
   print(i)
@@ -35,17 +31,3 @@ for (i in model_job_params$job.id) {
     saveRDS(rr, file.path(save_dir, paste0(this_job$algorithm, "_rr.rds")))
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

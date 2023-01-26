@@ -1,5 +1,5 @@
-folds = 5L # 5L
-n_evals = 15L # 15L
+folds = 5L
+n_evals = 15L
 
 tuning_config = list("classif" = list(
       resampling = rsmp("cv", folds = folds),
