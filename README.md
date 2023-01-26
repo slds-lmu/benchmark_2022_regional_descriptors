@@ -15,20 +15,26 @@
 - The neural network had to be saved differently due to keras (the autotuner could not be saved as usual; the models need to be stored as `.hdf5` files)
 - Main functions: `train_models.R`, `resample.R`, `get_resample_results.R`
 
-### 3) Interpretable Regional Descriptors (ird/)
+### 3) Evaluate Data using Model Info
+
+- Creates metainfos that is used as an input for the IRD methods and for the evaluation
+- For each model, dataset and x_interest the following is saved: (1) the largest, local box, (2) training data in the largest, local box, (3) sampled data in the largest local box, (4) connected, convex levelset L
+- Main functions: `generate_dataeval.R`
+
+### 4) Interpretable Regional Descriptors (ird/)
 
 - Runs the IRD methods for all datasets, models and `x_interest`, and stores the IRDs as `RegDescMethod`s.
 - Methods: MaxBox, PRIM, Anchors, MAIRE
 - Main functions: `find_ird.R`
 
-### 4) Evaluation (evaluation/)
+### 5) Evaluation (evaluation/)
 
-#### 4.1) DB setup
+#### 5.1) DB setup
 
 - Reads in the `RegDescMethod` objects, evaluates the irds and stores them in a sql_lite database (`db_evals.db`)
 - Main functions: `db_setup.R`
 
-#### 4.2) Analysis
+#### 5.2) Analysis
 
 - Creates box plots for comparing the irds of the different methods w.r.t to several evaluation measures
 - Creates box plots for comparing the speed of the different methods
