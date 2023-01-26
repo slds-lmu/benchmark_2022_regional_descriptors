@@ -7,9 +7,9 @@ library(ggpubr)
 library(scales)
 library(xtable)
 source("evaluation/analysis_helper.R")
+source("evaluation/analysis_helper_test.R")
 
-# RQ 1
-
+#--- FIGURES ----
 compare_methods(savepdf = TRUE, orientation = NULL,
   datastrategy = c("sampled", "traindata"), postprocessed = c(0, 1),
   quality_measures =  c("coverage_L_train", "coverage_L_sampled",
@@ -40,11 +40,10 @@ compare_methods(savepdf = TRUE, orientation = "model", postprocessed = c(1),
   quality_measures =  quality)
 
 
-# RQ1 + RQ3
+#--- TABLES ----
 create_runtime_maximality_table(
   quality_measures = c("maximality_train", "maximality_sampled", "efficiency"))
 
-source("evaluation/analysis_helper_test.R")
 statistical_analysis()
 
 
