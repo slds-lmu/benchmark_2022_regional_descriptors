@@ -11,10 +11,9 @@ source("helpers/get_predictor.R")
 source("helpers/get_desired_range.R")
 
 #----
-# 1) Get largest box, newly sampled data and local level set
+# 1) Get input for methods and evaluation metrics
 #----
 gridspace = data.table(expand.grid(x_interest = id_x_interest, model = model_names, data = data_names))
-# gridspace = gridspace[which(gridspace$model == "neural_network" & gridspace$data == "plasma_retinol"), ]
 
 get_closest_largest = function(data, x_interest, num) {
   data = fsetdiff(data, x_interest)
@@ -61,39 +60,37 @@ extra_info_list = apply(gridspace, MARGIN = 1, function(row) {
   sampdata = SamplerUnif$new(largest_box)$sample(n = nosamp)$data
   sampdata = largest_box$trafo(x = sampdata, predictor = pred)
 
-  # GET SUBSAMPLES OF DATA
-  subsamp_traindata = lapply(1:10, FUN = function(i) {
-    subsamp = inboxdata[sample(seq_len(nrow(inboxdata)), size = round(2/3*nrow(inboxdata))),]
-    saveRDS(subsamp, file = file.path(folder_dir, "subsample_traindata",
-                                      paste0(filename, "_", i, "_", ".rds")))
-  })
-  subsamp_sampled = lapply(1:10, FUN = function(i) {
-    subsamp = sampdata[sample(seq_len(nrow(sampdata)), size = round(2/3*nrow(sampdata))),]
-    saveRDS(subsamp, file = file.path(folder_dir, "subsample_sampled",
-                                      paste0(filename, "_", i, "_", ".rds")))
-  })
+  # # GET SUBSAMPLES OF DATA
+  # subsamp_traindata = lapply(1:10, FUN = function(i) {
+  #   subsamp = inboxdata[sample(seq_len(nrow(inboxdata)), size = round(2/3*nrow(inboxdata))),]
+  #   saveRDS(subsamp, file = file.path(folder_dir, "subsample_traindata",
+  #                                     paste0(filename, "_", i, "_", ".rds")))
+  # })
+  # subsamp_sampled = lapply(1:10, FUN = function(i) {
+  #   subsamp = sampdata[sample(seq_len(nrow(sampdata)), size = round(2/3*nrow(sampdata))),]
+  #   saveRDS(subsamp, file = file.path(folder_dir, "subsample_sampled",
+  #                                     paste0(filename, "_", i, "_", ".rds")))
+  # })
 
   # GET LOCAL LEVEL SET
   levelset = get_connected_samples(predictor = pred, x_interest = x_interest,
     desired_range = desired_range, num_sampled_points = 1000L, convexset = TRUE, resolution = 50L)
 
-  # GET LEVEL SET IN LARGEST BOX
-  levelsetlargest = levelset$training[identify_in_box(largest_box, levelset$training),]
-  levelsetlargest = get_closest_largest(levelsetlargest, x_interest, 5L)
-  missing = 5 - nrow(levelsetlargest) - 5
-  if (missing > 0) {
-    samplelargest = levelset$sampled[identify_in_box(largest_box, levelset$sampled),]
-    samplelargest = get_closest_largest(samplelargest, x_interest, missing)
-    levelsetlargest = rbind(levelsetlargest, samplelargest)
-  }
+  # # GET LEVEL SET IN LARGEST BOX
+  # levelsetlargest = levelset$training[identify_in_box(largest_box, levelset$training),]
+  # levelsetlargest = get_closest_largest(levelsetlargest, x_interest, 5L)
+  # missing = 5 - nrow(levelsetlargest) - 5
+  # if (missing > 0) {
+  #   samplelargest = levelset$sampled[identify_in_box(largest_box, levelset$sampled),]
+  #   samplelargest = get_closest_largest(samplelargest, x_interest, missing)
+  #   levelsetlargest = rbind(levelsetlargest, samplelargest)
+  # }
 
   filenamerds = paste0(filename, ".rds")
   saveRDS(largest_box, file = file.path(folder_dir, "largest_box", filenamerds))
   saveRDS(inboxdata, file = file.path(folder_dir, "data_inbox_traindata", filenamerds))
   saveRDS(sampdata, file = file.path(folder_dir, "data_inbox_sampled", filenamerds))
   saveRDS(levelset, file = file.path(folder_dir, "levelset", filenamerds))
-  saveRDS(levelsetlargest, file = file.path(folder_dir, "levelsetlargest", filenamerds))
+  # saveRDS(levelsetlargest, file = file.path(folder_dir, "levelsetlargest", filenamerds))
 })
 
-
-lookup = expand.grid(model = model_names, data = data_names)

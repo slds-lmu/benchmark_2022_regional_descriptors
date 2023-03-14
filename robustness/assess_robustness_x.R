@@ -9,15 +9,9 @@ TEST = FALSE
 # Setup
 source("ird/libs_ird.R")
 source("ird/helper_irdmethods_wrapper.R")
-source("ird/get_predictor_and_x_interest_pp.R")
 source("helpers/get_predictor.R")
 source("helpers/get_desired_range.R")
-
-# if (TEST) {
-#   source("ird/def_ird_test.R")
-# } else {
-  source("robustness/def_robustness_x.R")
-# }
+source("robustness/def_robustness_x.R")
 
 # Create registry
 OVERWRITE = TRUE
@@ -50,19 +44,15 @@ for (i in seq_along(data_list)) {
 addAlgorithm(name = "maire", fun = maire_wrapper)
 addAlgorithm(name = "maxbox", fun = maxbox_wrapper)
 addAlgorithm(name = "prim", fun = prim_wrapper)
-addAlgorithm(name = "anchors", fun = anchors_wrapper)
+# addAlgorithm(name = "anchors", fun = anchors_wrapper)
 
 # Add experiments
 addExperiments(algo.designs = ades)
 summarizeExperiments()
 exp = unwrap(getJobPars())
 
-# testJob(1L)
-
 # Run
 submitJobs()
 waitForJobs()
 getStatus()
-
-getErrorMessages()
 

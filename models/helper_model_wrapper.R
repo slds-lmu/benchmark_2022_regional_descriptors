@@ -126,23 +126,9 @@ nn_wrapper = function(data, job, instance, ...) {
   # Set Learner Hyperparams
 
   if (this_task$task_type == "classif") {
-    # get_keras_model = function(units, learning_rate = 3*10^-4) {
-    #   m = keras::keras_model_sequential()
-    #   m = keras::layer_dense(m, units = units, activation = "relu")
-    #   m = keras::layer_dense(m, units = 1L, activation = "sigmoid")
-    #   keras::compile(m, optimizer = keras::optimizer_adam(learning_rate), loss = "categorical_crossentropy", metrics = "accuracy")
-    #   m
-    # }
     nn_learner = lrn("classif.kerasff", predict_type = "prob",
       epochs = 500L, callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
   } else {
-    # get_keras_model = function(units, learning_rate = 3*10^-4) {
-    #   m = keras::keras_model_sequential()
-    #   m = keras::layer_dense(m, units = units, activation = "relu")
-    #   m = keras::layer_dense(m, units = 1L, activation = "sigmoid")
-    #   keras::compile(m, optimizer = keras::optimizer_adam(learning_rate), loss = "mean_squared_error", metrics = "mse")
-    #   m
-    # }
     nn_learner = lrn("regr.kerasff", epochs = 500L,
       callbacks = list(cb_es(monitor = "val_loss", patience = 5L)))
   }

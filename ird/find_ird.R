@@ -9,15 +9,10 @@ TEST = FALSE
 # Setup
 source("ird/libs_ird.R")
 source("ird/helper_irdmethods_wrapper.R")
-source("ird/get_predictor_and_x_interest_pp.R")
 source("helpers/get_predictor.R")
 source("helpers/get_desired_range.R")
+source("ird/def_ird.R")
 
-# if (TEST) {
-#   source("ird/def_ird_test.R")
-# } else {
-  source("ird/def_ird.R")
-# }
 
 # Create registry
 OVERWRITE = TRUE
@@ -56,27 +51,8 @@ addAlgorithm(name = "anchors", fun = anchors_wrapper)
 addExperiments(algo.designs = ades)
 summarizeExperiments()
 exp = unwrap(getJobPars())
-exp = exp[exp$id_x_interest == 1,]
-
-# exp[!duplicated(exp[c("problem", "algorithm", "model_name")])]
-
-# jobids = exp[id_x_interest == 1 & model_name != "hyperbox", "job.id", with = FALSE][[1]]
-
-# exp[model_name == "hyperbox" & problem == "diabetes",]
-
-# testJob(id = 3)
-
-# testJob(id = jobids[[1]])
-
-# for (id in jobids) {
-#   testJob(id = id)
-# }
-
 
 # Run
 submitJobs()
 waitForJobs()
 getStatus()
-
-getErrorMessages()
-
