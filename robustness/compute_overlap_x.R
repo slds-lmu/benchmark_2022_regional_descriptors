@@ -1,11 +1,10 @@
 add_results_to_db_robustness = function(data_set_name, reg) {
-
   reg = loadRegistry(reg_dir, make.default = FALSE)
   job_overview = unwrap(getJobPars(reg = reg))
-  jobs_of_this_data_set = job_overview[problem == data_set_name]
+  jobs_of_this_data_set = job_overview[problem == data_set_name & algorithm == "anchors",]
 
   traindata = data_list[[data_set_name]]
-  con = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x.db")
+  con = dbConnect(RSQLite::SQLite(), db_name)
   for (job_id in jobs_of_this_data_set$job.id) {
     this_job = job_overview[job.id == job_id]
 
@@ -50,12 +49,11 @@ add_results_to_db_robustness = function(data_set_name, reg) {
 
 evaluate_robustness = function(regdesc, data_set_name, traindata,
                                sampdata, model_name, id_x_interest, datastrategy, method, postproc) {
-
   ids_td = which(irgn::identify_in_box(regdesc$box, data = traindata))
   ids_sd = which(irgn::identify_in_box(regdesc$box, data = sampdata))
 
-  max_overlap_td = 0
-  max_overlap_sd = 0
+  max_overlap_td = NA
+  max_overlap_sd = NA
 
   # get jobs ids for newly x
   job_overview = unwrap(getJobPars(reg = regrobust))
@@ -65,12 +63,21 @@ evaluate_robustness = function(regdesc, data_set_name, traindata,
   jobs_of_this_data_set = job_overview[problem == data_set_name &
                                          model_name == md & id_x_interest == idx &
                                          datastrategy == ds & algorithm == method,]
-
   # for each job id
   for (job_id in jobs_of_this_data_set$job.id) {
+    # ird = try(readRDS(file.path("robustness/prod/registry_robustness_x_resubmit/",
+    #                             "results", paste0(job_id, ".rds"))))
+    # if (inherits(ird, "try-error")) {
+      ird = try(readRDS(file.path(reg_dir_robust,
+                                  "results", paste0(job_id, ".rds"))))
+    # }
 
-    ird = try(readRDS(file.path("robustness/prod/registry_robustness_x/", "results", paste0(job_id, ".rds"))))
     if (inherits(ird, "try-error")) next
+
+    if (is.na(max_overlap_td) & is.na(max_overlap_sd)) {
+      max_overlap_td = 0
+      max_overlap_sd = 0
+    }
 
     if (!postproc) {
       box = ird$orig$box
