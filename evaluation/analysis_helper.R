@@ -18,15 +18,12 @@ compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
 
     if (any(c("robustness_train", "robustness_sampled") %in% quality_measures)) {
       conres = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x.db")
-      conresanchors = dbConnect(RSQLite::SQLite(), "robustness/db_robustness_x_anchors.db")
       # all
-      resrobustness = tbl(conres, datanam) %>% collect() %>% filter(algorithm != "anchors")
-      resrobustness_anchors = tbl(conresanchors, datanam) %>% collect()
-      resrobustness = rbind(resrobustness, resrobustness_anchors)
+      resrobustness = tbl(conres, datanam) %>% collect()
       DBI::dbDisconnect(conres)
       resrobustness = resrobustness %>% select(job.id, problem, algorithm, id_x_interest, model_name, datastrategy,
                                postprocessed, robustness_traindata, robustness_sampled) %>%
-        # filter(algorithm != "anchors") %>%
+
         mutate(robustness_traindata = 1 - robustness_traindata,
                robustness_sampled = 1 - robustness_sampled)
 
