@@ -1,4 +1,4 @@
-compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
+compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
     quality_measures = c("coverage_train", "coverage_sampled", "precision_train", "precision_sampled"), # coverage_leverset_train, coverage_levelset_sampled
     postprocessed = c(0), datastrategy = c("traindata"), orientation = NULL, savepdf = FALSE) {
 
@@ -109,12 +109,12 @@ compare_methods = function (methods = c("maxbox", "prim", "anchors", "maire"),
   plt = plt +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
-    scale_y_continuous(breaks= pretty_breaks(n = 5)) +
+    scale_y_continuous(breaks= pretty_breaks(n = 4)) +
     # scale_y_continuous(breaks=c(0, 0.25, 0.5, 1)) +
     theme(
       #strip.text = element_text(size = 10, margin = margin(t = 2.5, r = 2.5,
       #  b = 2.5, l = 2.5, unit = "pt")),
-      axis.text.x = element_text(size = 7),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
       panel.spacing = unit(3, "pt")
     ) +
     coord_flip()
