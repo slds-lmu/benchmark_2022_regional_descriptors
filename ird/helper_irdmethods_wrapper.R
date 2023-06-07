@@ -58,7 +58,7 @@ maxbox_wrapper = function(data, job, instance, ...) {
 
    # Run method
   start_time = Sys.time()
-  method = MaxBox$new(pred, quiet = TRUE)
+  method = MaxBox$new(pred, efficient = TRUE, quiet = TRUE)
   box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
   end_time = Sys.time()
 
@@ -140,7 +140,7 @@ anchors_wrapper = function(data, job, instance, ...) {
 
    # Run method
   start_time = Sys.time()
-  method = Anchor$new(pred, quiet = TRUE)
+  method = Anchor$new(pred, quiet = FALSE)
   box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
   end_time = Sys.time()
 
@@ -150,7 +150,7 @@ anchors_wrapper = function(data, job, instance, ...) {
 
   # Postprocessing
   start_time = Sys.time()
-  post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = TRUE)
+  post = PostProcessing$new(pred, subbox_relsize = 0.1, evaluation_n = 100L, quiet = FALSE)
   boxpost = post$find_box(x_interest = x_interest,
     desired_range = desired_range, box_init = box$box, box_largest = box_largest)
   end_time = Sys.time()
