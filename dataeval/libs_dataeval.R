@@ -4,5 +4,5 @@ if (length(new_packages) > 0L) install.packages(new_packages)
 
 sapply(packages, require, character.only = TRUE)
 
-load_all("../irgn")
+load_all("irdpackage")
 
