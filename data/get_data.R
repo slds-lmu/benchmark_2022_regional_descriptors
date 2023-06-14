@@ -20,7 +20,7 @@ for (i in seq_along(data_ids)) {
   oml_data$data[, (factor_cols) :=  lapply(.SD, droplevels), .SDcols = factor_cols]
   idx_x_interest = sample.int(nrow(oml_data$data), size = 5L)
   x_interest_list[[i]] = oml_data$data[idx_x_interest, ]
-  data_list[[i]] = oml_data$data[-idx_x_interest, ] 
+  data_list[[i]] = oml_data$data
 }
 names(data_list) = names(data_ids)
 names(x_interest_list) = names(data_ids)
