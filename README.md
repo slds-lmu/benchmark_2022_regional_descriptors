@@ -2,6 +2,11 @@
 
 ## Structure
 
+### 0) R package for IRD methods (irdpackage/) 
+- Contains the implementations of all IRD methods & Anchors
+- Incl. some documents and tests
+- It also contains the credit data example (irdpackage/inst/examples)
+
 ### 1) Data (data/)
 
 - Loads the required datasets from OpenML: https://www.openml.org/
