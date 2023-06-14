@@ -34,4 +34,6 @@ algos <- c(
 # BATCHTOOLS configurations
 n_cores <- 15L
 registry_dir <- "models/prod/registry"
+keras_dir <- "models/prod/keras"
 if (!dir.exists(dirname(registry_dir))) dir.create(dirname(registry_dir))
+if (!dir.exists(keras_dir)) dir.create(keras_dir)

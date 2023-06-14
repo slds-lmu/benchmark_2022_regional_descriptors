@@ -19,8 +19,7 @@ for (i in seq_along(data_ids)) {
   factor_cols = names(oml_data$data)[sapply(oml_data$data, is.factor)]
   oml_data$data[, (factor_cols) :=  lapply(.SD, droplevels), .SDcols = factor_cols]
   idx_x_interest = sample.int(nrow(oml_data$data), size = 5L)
-  oml_data$.__enclos_env__$private$.data[-idx_x_interest, ]
-  x_interest_list[[i]] = oml_data$.__enclos_env__$private$.data[idx_x_interest, ]
+  x_interest_list[[i]] = oml_data$data[idx_x_interest, ]
   data_list[[i]] = oml_data$data
 }
 names(data_list) = names(data_ids)

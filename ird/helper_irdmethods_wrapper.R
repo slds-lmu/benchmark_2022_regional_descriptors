@@ -21,6 +21,10 @@ maire_wrapper = function(data, job, instance, ...) {
   box = method$find_box(x_interest = x_interest, desired_range = desired_range, obsdata = obsdata, box_largest = box_largest)
   end_time = Sys.time()
 
+  # if (box$evaluate_train()[[1]] < 1) {
+  #   stop("training eval not 100 %")
+  # }
+
   # save info on runtime and calls to fhat
   attr(box, "runtime") = as.numeric(end_time - start_time)
   attr(box, "calls_fhat") = method$calls_fhat
@@ -160,5 +164,11 @@ anchors_wrapper = function(data, job, instance, ...) {
   attr(boxpost, "calls_fhat") = post$calls_fhat
 
   return(list(orig = box, postproc = boxpost))
+}
+
+
+get_predictor_and_x_interest_pp = function(arg_list, job, data) {
+  library(batchtools)
+  get_predictor(data, model_name = arg_list$model_name, data_name = job$prob.name, id_x_interest = arg_list$id_x_interest)
 }
 

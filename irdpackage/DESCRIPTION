@@ -1,0 +1,36 @@
+Package: irdpackage
+Type: Package
+Title: Interpretable Regional Descriptor
+Version: 0.1.0
+Author: Susanne Dandl <dandls.datascience@gmail.com>
+Maintainer: Susanne Dandl <dandls.datascience@gmail.com>
+Description: IRDs are hyperboxes that describe how an observation's feature values can be changed without affecting its prediction.
+    The following methods are currently implemented: Eckstein et al. (2002) <doi:10.1023/A:1020546910706>,
+    Friedman and Fisher (1999)  <doi:10.1023/A:1008894516817>, Ribeiro et al. (2018) <doi:10.1609/aaai.v32i1.11491>
+    and Sharma et al. (2021) <doi:10.1007/978-3-030-84060-0_21>.
+    Once generated, the boxes can be postprocessed, analyzed and visualized by provided functionalities.
+URL: https://github.com/dandls/irgn/
+BugReports: https://github.com/dandls/irgn/issues
+Depends: 
+	R (>= 3.1.0)
+Imports:
+	checkmate,
+	paradox,
+	parallel,
+	iml, 
+	data.table
+Suggests: 
+    knitr,
+    rmarkdown,
+    MASS,
+    tensorflow,
+    keras,
+    StatMatch,
+    testthat (>= 3.0.0)
+License: LGPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Remotes:
+  viadee/anchorsOnR
+Config/testthat/edition: 3
