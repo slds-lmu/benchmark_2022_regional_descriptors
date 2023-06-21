@@ -10,7 +10,6 @@ compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
 
   # loop through dataset to compute ranks of objectives, average these over the datapoints
   aggrres = lapply(data_set_names, function(datanam) {
-
     con = dbConnect(RSQLite::SQLite(), "evaluation/db_evals.db")
     res = tbl(con, datanam) %>% collect()
     DBI::dbDisconnect(con)
@@ -60,15 +59,19 @@ compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
   names(aggrres) = data_set_names
   ll = dplyr::bind_rows(aggrres, .id = "dataset")
 
+
+  ll$quality = recode(ll$quality, precision_train = "precision_training", coverage_train = "coverage_training", coverage_L_train = "coverage_L_training")
+  ll$datastrategy = recode(ll$datastrategy, traindata = "training")
+
   ll = ll %>%
     group_by(problem, model_name, id_x_interest) %>%
     mutate(group_id = cur_group_id()) %>%
     ungroup()
 
-  ll$postprocessed = factor(ll$postprocessed, levels = c(0, 1), label = c("without postproc", "with postproc"))
+  ll$postprocessed = factor(ll$postprocessed, levels = c(0, 1), label = c("without post-processing", "with post-processing"))
   # ll$algorithm = factor(ll$algorithm, levels = apply(expand.grid(rev(methods), datastrategy), 1, paste, collapse="_"))
   ll$algorithm = factor(ll$algorithm, levels = rev(methods))
-  ds = datastrategy
+  ds = recode(datastrategy, traindata = "training")
   ll$datastrategy = factor(ll$datastrategy, levels = rev(ds))
   ll$dataset = factor(ll$dataset, levels = data_set_names, labels = data_set_names)
 
@@ -84,8 +87,8 @@ compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
     } else {
       plt = plt + facet_wrap(~quality)
     }
-    height = 3
-    width = 7
+    height = 2.9
+    width = 6.5
   } else if (orientation == "model") {
     if (all(c("traindata", "sampled") %in% datastrategy)) {
       plt = plt + facet_grid(model_name + datastrategy ~ quality)
@@ -106,14 +109,17 @@ compare_methods = function (methods = c("maxbox", "prim", "maire", "anchors"),
   plt = plt +
     scale_fill_manual(values = RColorBrewer::brewer.pal(n = n_colors, name = "Paired")) +
     theme_bw() +
-    scale_y_continuous(breaks= pretty_breaks(n = 4)) +
+    # scale_y_continuous(breaks= pretty_breaks(n = 3)) +
     # scale_y_continuous(breaks=c(0, 0.25, 0.5, 1)) +
     theme(
       #strip.text = element_text(size = 10, margin = margin(t = 2.5, r = 2.5,
       #  b = 2.5, l = 2.5, unit = "pt")),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
-      panel.spacing = unit(3, "pt")
+      # axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
+      panel.spacing = unit(4, "pt"),
+      plot.margin = margin(1,0,-10,0,"pt")
     ) +
+    scale_y_continuous(breaks=seq(0, 1, 0.2),
+      labels=c("0", ".2", ".4", ".6", ".8", "1")) +
     coord_flip()
   # colorlines = "tan4"
   # plt = plt +
