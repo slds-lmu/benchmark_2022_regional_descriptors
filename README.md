@@ -1,4 +1,4 @@
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)]([https://www.gnu.org/licenses/lgpl-3.0](https://github.com/slds-lmu/supplementary_2023_ird/blob/main/irdpackage/LICENSE))
 # Benchmarking repository of interpretable regional descriptors
 
 ## Structure
